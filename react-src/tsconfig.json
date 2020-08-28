@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "module": "CommonJS",
+    "sourceMap": true,
+    "watch": false,
+    "outDir": "build",
+    "isolatedModules": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "preserveConstEnums": true
+  },
+  "compileOnSave": true,
+  "exclude": ["node_modules"],
+  "include": ["./**/*"]
+}

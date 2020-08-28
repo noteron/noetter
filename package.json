@@ -4,7 +4,9 @@
   "description": "An electron note taking app for markdown",
   "main": "build/main.js",
   "scripts": {
-    "start": "tsc && electron .",
+    "react": "webpack-dev-server",
+    "electron-tsc": "tsc -p ./electron-src",
+    "electron": "tsc -p ./electron-src && electron .",
     "install-extensions": "code --install-extension dbaeumer.vscode-eslint && code --install-extension esbenp.prettier-vscode"
   },
   "repository": {
@@ -14,7 +16,23 @@
   "author": "Electron Boys",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/webpack": "^4.41.21",
+    "@types/webpack-dev-server": "^3.11.0",
     "electron": "10.1.0",
-    "typescript": "4.0.2"
+    "eslint": "^7.7.0",
+    "eslint-plugin-react": "^7.20.6",
+    "eslint-plugin-react-hooks": "^4.1.0",
+    "html-webpack-plugin": "^4.3.0",
+    "ts-loader": "^8.0.3",
+    "typescript": "4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@types/react": "^16.9.48",
+    "@types/react-dom": "^16.9.8",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }

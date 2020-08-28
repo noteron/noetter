@@ -9,7 +9,7 @@ const createWindow = () => {
     }
   });
 
-  win.loadFile("index.html");
+  win.loadURL("http://localhost:8080");
 };
 
 app.whenReady().then(createWindow);

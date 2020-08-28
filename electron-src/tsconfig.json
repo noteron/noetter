@@ -4,9 +4,10 @@
     "module": "CommonJS",
     "sourceMap": true,
     "watch": false,
-    "outDir": "build"
+    "outDir": "../build",
+    "preserveConstEnums": true
   },
   "compileOnSave": true,
   "exclude": ["node_modules"],
-  "include": ["src/**/*.ts"]
+  "include": ["main.ts"]
 }
