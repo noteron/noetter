@@ -3,7 +3,7 @@
     "target": "ES2018",
     "module": "CommonJS",
     "sourceMap": true,
-    "watch": true,
+    "watch": false,
     "outDir": "build"
   },
   "compileOnSave": true,
