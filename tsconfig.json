@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES2018",
+    "module": "CommonJS",
+    "sourceMap": true,
+    "watch": true,
+    "outDir": "build"
+  },
+  "compileOnSave": true,
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"]
+}

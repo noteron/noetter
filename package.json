@@ -1,0 +1,20 @@
+{
+  "name": "notes",
+  "version": "0.1.0",
+  "description": "An electron note taking app for markdown",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "install-extensions": "code --install-extension dbaeumer.vscode-eslint && code --install-extension esbenp.prettier-vscode"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@ssh.gitlab.pucko.fail:electron-people/notes.git"
+  },
+  "author": "Electron Boys",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "10.1.0",
+    "typescript": "^4.0.2"
+  }
+}
