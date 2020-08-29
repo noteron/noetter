@@ -10,7 +10,7 @@ Project was set up using https://www.electronjs.org/docs/tutorial/first-app.
 
 ## Documentations
 
-Material UI react library: https://material-ui.com
-React: https://reactjs.org/
-Typescript: https://www.typescriptlang.org/
-Electron: https://www.electronjs.org/
+- Material UI react library: https://material-ui.com
+- React: https://reactjs.org/
+- Typescript: https://www.typescriptlang.org/
+- Electron: https://www.electronjs.org/
