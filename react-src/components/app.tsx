@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -8,8 +8,10 @@ import {
   makeStyles,
   Theme,
   createStyles,
-  Typography
+  Typography,
+  TextareaAutosize
 } from "@material-ui/core";
+import useMarkdown from "./hooks/use-markdown";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -42,8 +44,41 @@ const useStyles = makeStyles(() =>
   })
 );
 
+const inputMarkdown: string = `
+# Weow
+## Live editing is working fine
+
+- Some
+  - Bullet
+    - Points
+
+ 1. And
+ 1. some
+   1. numbers
+
+\`\`\`
+monospace
+\`\`\`
+
+Inline \`monospace\` test
+
+<div>
+ How about some html?
+<div>
+<img src="http://http.cat/404" height="100px"/>
+`;
+
 const App = (): JSX.Element => {
+  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
   const classes = useStyles(darkTheme);
+  const renderedMarkdown = useMarkdown(rawMarkdown);
+
+  const handleOnChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
+      setRawMarkdown(event.target.value),
+    []
+  );
+
   return (
     <>
       <ThemeProvider theme={darkTheme}>
@@ -56,9 +91,13 @@ const App = (): JSX.Element => {
               </Paper>
               <Paper variant="outlined" square className={classes.paper}>
                 <Typography>Notes in directory goes here</Typography>
+                <TextareaAutosize
+                  onChange={handleOnChange}
+                  value={rawMarkdown}
+                />
               </Paper>
               <Paper variant="outlined" square className={classes.paper}>
-                <Typography>Editor and viewer goes here</Typography>
+                {renderedMarkdown}
               </Paper>
             </Grid>
           </Grid>

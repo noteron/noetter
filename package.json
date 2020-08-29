@@ -16,6 +16,7 @@
   "author": "Electron Boys",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/markdown-to-jsx": "^6.11.2",
     "@types/material-ui": "^0.21.8",
     "@types/webpack": "^4.41.21",
     "@types/webpack-dev-server": "^3.11.0",
@@ -41,6 +42,7 @@
     "@types/react": "^16.9.48",
     "@types/react-dom": "^16.9.8",
     "fontsource-roboto": "^3.0.3",
+    "markdown-to-jsx": "^6.11.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   }
