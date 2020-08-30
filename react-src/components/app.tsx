@@ -25,21 +25,33 @@ const darkTheme = createMuiTheme({
   }
 });
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       flexGrow: 1,
       width: "100%",
       overflowX: "hidden",
+      overflowY: "hidden",
       margin: 0
     },
     item: {
-      padding: 0
+      padding: 0,
+      flexGrow: 1,
+      height: "100vh"
     },
     paper: {
       padding: 20,
       flexGrow: 1,
-      height: "100vh"
+      height: "100vh",
+      overflowY: "scroll",
+      wordWrap: "break-word",
+      overflowWrap: "break-word",
+      scrollbarWidth: "thin"
+    },
+    textArea: {
+      border: "none",
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary
     }
   })
 );
@@ -83,23 +95,32 @@ const App = (): JSX.Element => {
     <>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <Grid container spacing={0} className={classes.root}>
-          <Grid item xs={12} className={classes.item}>
-            <Grid container justify="center">
-              <Paper variant="outlined" square className={classes.paper}>
-                <Typography>Tree goes here</Typography>
-              </Paper>
-              <Paper variant="outlined" square className={classes.paper}>
-                <Typography>Notes in directory goes here</Typography>
-                <TextareaAutosize
-                  onChange={handleOnChange}
-                  value={rawMarkdown}
-                />
-              </Paper>
-              <Paper variant="outlined" square className={classes.paper}>
-                {renderedMarkdown}
-              </Paper>
-            </Grid>
+        <Grid
+          container
+          justify="center"
+          direction="row"
+          className={classes.root}
+        >
+          <Grid item xs={2} className={classes.item}>
+            <Paper variant="outlined" square className={classes.paper}>
+              <Typography>Tree goes here</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={3} className={classes.item}>
+            <Paper variant="outlined" square className={classes.paper}>
+              <Typography>Notes in directory goes here</Typography>
+              <TextareaAutosize
+                draggable={false}
+                className={classes.textArea}
+                onChange={handleOnChange}
+                value={rawMarkdown}
+              />
+            </Paper>
+          </Grid>
+          <Grid item xs={7} className={classes.item}>
+            <Paper variant="outlined" square className={classes.paper}>
+              {renderedMarkdown}
+            </Paper>
           </Grid>
         </Grid>
       </ThemeProvider>

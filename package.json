@@ -5,7 +5,8 @@
   "main": "build/main.js",
   "scripts": {
     "react": "webpack-dev-server",
-    "electron-tsc": "tsc -p ./electron-src",
+    "react-build": "webpack --production",
+    "electron-build": "tsc -p ./electron-src",
     "electron": "tsc -p ./electron-src && electron .",
     "install-extensions": "code --install-extension dbaeumer.vscode-eslint && code --install-extension esbenp.prettier-vscode"
   },
