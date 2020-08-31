@@ -1,22 +1,27 @@
 module.exports = {
-  env: {
-    browser: true,
-    es6: true,
-    node: true
+  extends: "erb/typescript",
+  rules: {
+    // A temporary hack related to IDE not resolving correct package.json
+    "import/no-extraneous-dependencies": "off",
+    "prettier/prettier": ["error", { singleQuotes: false }]
   },
   parserOptions: {
-    ecmaVersion: 2018
+    ecmaVersion: 2020,
+    sourceType: "module",
+    project: "./tsconfig.json",
+    tsconfigRootDir: __dirname,
+    createDefaultProgram: true
   },
-  extends: [
-    "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended"
-  ],
-  plugins: ["react-hooks"],
-  rules: {
-    indent: ["error", 2],
-    "linebreak-style": ["error", "unix"],
-    quotes: ["error", "double"],
-    semi: ["error", "always"]
+  settings: {
+    "import/resolver": {
+      // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
+      node: {},
+      webpack: {
+        config: require.resolve("./configs/webpack.config.eslint.js")
+      }
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    }
   }
 };
