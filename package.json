@@ -85,7 +85,6 @@
     "linux": {
       "target": [
         "deb",
-        "rpm",
         "AppImage"
       ],
       "category": "Development"
@@ -93,12 +92,6 @@
     "directories": {
       "buildResources": "resources",
       "output": "release"
-    },
-    "publish": {
-      "provider": "gitlab",
-      "owner": "electron-people",
-      "repo": "notes",
-      "private": true
     }
   },
   "repository": {
