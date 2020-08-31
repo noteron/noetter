@@ -5,7 +5,7 @@ import { Typography } from "@material-ui/core";
 const VerticalDisplaySection = (): JSX.Element => {
   return (
     <>
-      <Typography variant="h1" color={"primary"}>
+      <Typography variant="h1" color="primary">
         Notes
       </Typography>
     </>

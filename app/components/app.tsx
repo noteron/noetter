@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const inputMarkdown: string = `
+const inputMarkdown = `
 # Weow
 ## Live editing is working fine
 
