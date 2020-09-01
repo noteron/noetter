@@ -12,6 +12,9 @@ import {
   TextareaAutosize
 } from "@material-ui/core";
 import useMarkdown from "./hooks/use-markdown";
+import VerticalDisplaySection from "./layout/vertical-display-section";
+import MarkdownEditor from "./features/markdown-editor";
+import useShortcut from "./hooks/use-shortcut";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -30,65 +33,36 @@ const useStyles = makeStyles((theme: Theme) =>
     root: {
       flexGrow: 1,
       width: "100%",
+      margin: 0,
+      maxHeight: "100vh",
+      height: "100%",
       overflowX: "hidden",
-      overflowY: "hidden",
-      margin: 0
+      overflowY: "hidden"
     },
     item: {
       padding: 0,
       flexGrow: 1,
       height: "100vh"
-    },
-    paper: {
-      padding: 20,
-      flexGrow: 1,
-      height: "100vh",
-      overflowY: "scroll",
-      wordWrap: "break-word",
-      overflowWrap: "break-word",
-      scrollbarWidth: "thin"
-    },
-    textArea: {
-      border: "none",
-      backgroundColor: theme.palette.background.paper,
-      color: theme.palette.text.primary
     }
   })
 );
 
-const inputMarkdown = `
-# Weow
-## Live editing is working fine
-
-- Some
-  - Bullet
-    - Points
-
- 1. And
- 1. some
-   1. numbers
-
-\`\`\`
-monospace
-\`\`\`
-
-Inline \`monospace\` test
-
-<div>
- How about some html?
-<div>
-<img src="http://http.cat/404" height="100px"/>
-`;
-
 const App = (): JSX.Element => {
-  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
   const classes = useStyles(darkTheme);
-  const renderedMarkdown = useMarkdown(rawMarkdown);
+  const [zenMode, setZenMode] = useState<boolean>(false);
 
-  const handleOnChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
-      setRawMarkdown(event.target.value),
+  const toggleZenMode = useCallback(
+    () => setZenMode((prev: boolean) => !prev),
     []
+  );
+
+  useShortcut(
+    {
+      altKey: true,
+      ctrlKey: true,
+      key: "z"
+    },
+    toggleZenMode
   );
 
   return (
@@ -101,26 +75,23 @@ const App = (): JSX.Element => {
           direction="row"
           className={classes.root}
         >
-          <Grid item xs={2} className={classes.item}>
-            <Paper variant="outlined" square className={classes.paper}>
-              <Typography>Tree goes here</Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={3} className={classes.item}>
-            <Paper variant="outlined" square className={classes.paper}>
-              <Typography>Notes in directory goes here</Typography>
-              <TextareaAutosize
-                draggable={false}
-                className={classes.textArea}
-                onChange={handleOnChange}
-                value={rawMarkdown}
-              />
-            </Paper>
-          </Grid>
-          <Grid item xs={7} className={classes.item}>
-            <Paper variant="outlined" square className={classes.paper}>
-              {renderedMarkdown}
-            </Paper>
+          {!zenMode && (
+            <Grid item xs={2} className={classes.item}>
+              <VerticalDisplaySection>
+                <Typography>Tree goes here</Typography>
+              </VerticalDisplaySection>
+            </Grid>
+          )}
+
+          {!zenMode && (
+            <Grid item xs={3} className={classes.item}>
+              <VerticalDisplaySection>
+                <Typography>Notes in directory goes here</Typography>
+              </VerticalDisplaySection>
+            </Grid>
+          )}
+          <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
+            <MarkdownEditor />
           </Grid>
         </Grid>
       </ThemeProvider>
