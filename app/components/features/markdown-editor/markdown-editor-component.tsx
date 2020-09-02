@@ -1,11 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  TextareaAutosize,
-  useTheme,
-  makeStyles,
-  Theme,
-  createStyles
-} from "@material-ui/core";
+import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useShortcut from "../../hooks/use-shortcut";
@@ -43,7 +37,10 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "100%",
       width: "100%",
       fontFamily: "monospace",
-      fontSize: 18
+      fontSize: 18,
+      "&:focus": {
+        outline: "none"
+      }
     }
   })
 );
@@ -78,14 +75,20 @@ const MarkdownEditorComponent = (): JSX.Element => {
   return (
     <VerticalDisplaySection>
       {editMode ? (
-        <TextareaAutosize
-          autoFocus
+        <textarea
           draggable={false}
           className={classes.textArea}
           onChange={handleOnChange}
           value={rawMarkdown}
         />
       ) : (
+        // <TextareaAutosize
+        //   autoFocus
+        //   draggable={false}
+        //   className={classes.textArea}
+        //   onChange={handleOnChange}
+        //   value={rawMarkdown}
+        // />
         renderedMarkdown
       )}
     </VerticalDisplaySection>
