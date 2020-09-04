@@ -45,10 +45,17 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const MarkdownEditorComponent = (): JSX.Element => {
+type Props = {
+  rawMarkdown: string;
+  onChange: (value: string) => void;
+};
+
+const MarkdownEditorComponent = ({
+  rawMarkdown,
+  onChange
+}: Props): JSX.Element => {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
   const renderedMarkdown = useMarkdown(rawMarkdown);
   const [editMode, setEditMode] = useState<boolean>(false);
 
@@ -68,8 +75,8 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
-      setRawMarkdown(event.target.value),
-    []
+      onChange(event.target.value),
+    [onChange]
   );
 
   return (
