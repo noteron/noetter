@@ -1,20 +1,22 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
   CssBaseline,
   Grid,
-  Paper,
   makeStyles,
   Theme,
   createStyles,
   Typography,
-  TextareaAutosize
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
 } from "@material-ui/core";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import useMarkdown from "./hooks/use-markdown";
+import FolderIcon from "@material-ui/icons/Folder";
 import VerticalDisplaySection from "./layout/vertical-display-section";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
@@ -61,15 +63,29 @@ const App = (): JSX.Element => {
   const [fileList, setFileList] = useState<string[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
 
+  const homeDir = useMemo<string>(() => os.homedir(), []);
+  const folderPath = useMemo<string>(
+    () => path.normalize(`${homeDir}\\.notes`),
+    [homeDir]
+  );
+
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
     []
   );
 
-  const fetchFiles = useCallback((): void => {
-    const homeDir = os.homedir();
-    const folderPath = path.normalize(`${homeDir}\\.notes`);
+  const openMarkdownFile = useCallback(
+    (fileName: string): void => {
+      const fileContent = fs.readFileSync(
+        path.normalize(`${folderPath}/${fileName}`),
+        { encoding: "utf-8" }
+      );
+      setCurrentNote({ fileName, content: fileContent });
+    },
+    [folderPath]
+  );
 
+  const fetchFiles = useCallback((): void => {
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath);
     }
@@ -78,13 +94,9 @@ const App = (): JSX.Element => {
 
     if (folderContent.length) {
       // open first file and read from it
-      const fileContent = fs.readFileSync(
-        path.normalize(`${folderPath}/${folderContent[0]}`),
-        { encoding: "utf-8" }
-      );
-      setCurrentNote({ fileName: folderContent[0], content: fileContent });
+      openMarkdownFile(folderContent[0]);
     }
-  }, []);
+  }, [folderPath, openMarkdownFile]);
 
   useEffect(() => {
     fetchFiles();
@@ -97,6 +109,27 @@ const App = (): JSX.Element => {
       key: "z"
     },
     toggleZenMode
+  );
+
+  const memoizedFileList = useMemo<React.ReactNode>(
+    () =>
+      fileList.length ? (
+        fileList.map((fileName) => (
+          <ListItem
+            button
+            selected={currentNote.fileName === fileName}
+            onClick={() => {
+              openMarkdownFile(fileName);
+            }}
+            key={fileName}
+          >
+            {fileName}
+          </ListItem>
+        ))
+      ) : (
+        <Typography>No files created</Typography>
+      ),
+    [currentNote.fileName, fileList, openMarkdownFile]
   );
 
   return (
@@ -119,16 +152,15 @@ const App = (): JSX.Element => {
 
           {!zenMode && (
             <Grid item xs={3} className={classes.item}>
-              <VerticalDisplaySection>
-                <Typography>Notes</Typography>
-                {fileList.length ? (
-                  fileList.map((fileName) => (
-                    <Typography key={fileName}>{fileName}</Typography>
-                  ))
-                ) : (
-                  <Typography>No files created</Typography>
-                )}
-              </VerticalDisplaySection>
+              <List>
+                <ListItem style={{ fontWeight: "bold" }}>
+                  <ListItemIcon>
+                    <FolderIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={`Notes (${fileList.length})`} />
+                </ListItem>
+                {memoizedFileList}
+              </List>
             </Grid>
           )}
           <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
