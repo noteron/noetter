@@ -4,14 +4,10 @@ import {
   createMuiTheme,
   CssBaseline,
   Grid,
-  Paper,
   makeStyles,
-  Theme,
   createStyles,
-  Typography,
-  TextareaAutosize
+  Typography
 } from "@material-ui/core";
-import useMarkdown from "./hooks/use-markdown";
 import VerticalDisplaySection from "./layout/vertical-display-section";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
@@ -28,7 +24,7 @@ const darkTheme = createMuiTheme({
   }
 });
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       flexGrow: 1,
@@ -37,7 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
       maxHeight: "100vh",
       height: "100%",
       overflowX: "hidden",
-      overflowY: "hidden"
+      overflowY: "hidden",
+      fontSize: 20,
+      fontFamily: "Roboto"
     },
     item: {
       padding: 0,
@@ -48,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const App = (): JSX.Element => {
-  const classes = useStyles(darkTheme);
+  const classes = useStyles();
   const [zenMode, setZenMode] = useState<boolean>(false);
 
   const toggleZenMode = useCallback(

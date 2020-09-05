@@ -1,32 +1,14 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useShortcut from "../../hooks/use-shortcut";
-import "fontsource-roboto";
+import useEditorTools from "./hooks/use-editor-tools";
+import { InsertType } from "./types";
 
-const inputMarkdown = `# Weow
-## Live editing is working fine
-
-- Some
-  - Bullet
-    - Points
-
- 1. And
- 1. some
-   1. numbers
-
-\`\`\`
-monospace
-\`\`\`
-
-Inline \`monospace\` test
-
-<div>
- How about some html?
-<div>
-<img src="http://http.cat/404" height="100px"/>
-`;
+const inputMarkdown = `# 1
+## 2
+### 3`;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,8 +18,9 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.text.primary,
       height: "100%",
       width: "100%",
-      fontFamily: "monospace",
-      fontSize: 18,
+      fontFamily: "Hack",
+      fontSize: 20,
+      resize: "none",
       "&:focus": {
         outline: "none"
       }
@@ -46,15 +29,35 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const MarkdownEditorComponent = (): JSX.Element => {
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
   const theme = useTheme();
   const classes = useStyles(theme);
-  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
   const renderedMarkdown = useMarkdown(rawMarkdown);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const textArea = useRef<HTMLTextAreaElement>(null);
 
-  const toggleEditMode = useCallback(
+  const handleOnMarkdownUpdated = useCallback(
+    (newMarkdown: string) => setRawMarkdown(newMarkdown),
+    []
+  );
+
+  const { insertOrReplaceAtPosition, writeDebugInfoToConsole } = useEditorTools(
+    rawMarkdown,
+    handleOnMarkdownUpdated
+  );
+
+  const handleOnToggleEditModeShortcut = useCallback(
     () => setEditMode((prev: boolean) => !prev),
     []
+  );
+
+  const handleOnInsertCheckboxShortcut = useCallback(() => {
+    insertOrReplaceAtPosition(" - [ ] ", InsertType.RowStart, textArea);
+  }, [insertOrReplaceAtPosition]);
+
+  const handleOnDebugShortcut = useCallback(
+    () => writeDebugInfoToConsole(textArea),
+    [writeDebugInfoToConsole]
   );
 
   useShortcut(
@@ -63,12 +66,31 @@ const MarkdownEditorComponent = (): JSX.Element => {
       ctrlKey: true,
       key: "e"
     },
-    toggleEditMode
+    handleOnToggleEditModeShortcut
+  );
+
+  useShortcut(
+    {
+      altKey: true,
+      ctrlKey: false,
+      key: "d"
+    },
+    handleOnInsertCheckboxShortcut
+  );
+
+  useShortcut(
+    {
+      altKey: true,
+      ctrlKey: false,
+      key: "s"
+    },
+    handleOnDebugShortcut
   );
 
   const handleOnChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
-      setRawMarkdown(event.target.value),
+    (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
+      setRawMarkdown(event.target.value);
+    },
     []
   );
 
@@ -76,19 +98,13 @@ const MarkdownEditorComponent = (): JSX.Element => {
     <VerticalDisplaySection>
       {editMode ? (
         <textarea
+          ref={textArea}
           draggable={false}
           className={classes.textArea}
           onChange={handleOnChange}
           value={rawMarkdown}
         />
       ) : (
-        // <TextareaAutosize
-        //   autoFocus
-        //   draggable={false}
-        //   className={classes.textArea}
-        //   onChange={handleOnChange}
-        //   value={rawMarkdown}
-        // />
         renderedMarkdown
       )}
     </VerticalDisplaySection>

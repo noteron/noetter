@@ -1,17 +1,11 @@
 import React, { ReactNode } from "react";
-import {
-  Paper,
-  makeStyles,
-  Theme,
-  createStyles,
-  useTheme
-} from "@material-ui/core";
+import { Paper, makeStyles, createStyles } from "@material-ui/core";
 
 type Props = {
   children: ReactNode | undefined;
 };
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     paper: {
       padding: 20,
@@ -25,8 +19,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const VerticalDisplaySection = ({ children }: Props): JSX.Element => {
-  const theme = useTheme();
-  const classes = useStyles(theme);
+  const classes = useStyles();
   return (
     <Paper variant="outlined" square className={classes.paper}>
       {children}
