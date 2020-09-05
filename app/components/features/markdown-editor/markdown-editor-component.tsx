@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.text.primary,
       height: "100%",
       width: "100%",
-      fontFamily: "Hack",
+      fontFamily: "monospace",
       fontSize: 20,
       resize: "none",
       "&:focus": {
