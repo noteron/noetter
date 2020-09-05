@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import FolderIcon from "@material-ui/icons/Folder";
+import { Note } from "@material-ui/icons";
 import { FileDescription } from "../../hooks/use-file-reader";
 
 type Props = {
@@ -27,10 +27,7 @@ const NotesList = ({
             }}
             key={file.fileName}
           >
-            <ListItemText
-              primary={file.title}
-              secondary={file.tags.join(" & ")}
-            />
+            <ListItemText primary={file.title} />
           </ListItem>
         ))
       ) : (
@@ -40,10 +37,10 @@ const NotesList = ({
   );
 
   return (
-    <List dense>
-      <ListItem>
+    <List>
+      <ListItem dense>
         <ListItemIcon>
-          <FolderIcon />
+          <Note />
         </ListItemIcon>
         <ListItemText primary={`Notes (${numberOfFiles})`} />
       </ListItem>
