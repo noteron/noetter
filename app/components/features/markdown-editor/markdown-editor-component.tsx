@@ -5,6 +5,7 @@ import useMarkdown from "../../hooks/use-markdown";
 import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType } from "./types";
+import useImageAttachments from "./hooks/use-image-attachments";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -38,6 +39,8 @@ const MarkdownEditorComponent = ({
   const renderedMarkdown = useMarkdown(rawMarkdown);
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
+  const [imageString, setImageString] = useState<string>();
+  const { transformImages, clipboardContainsImage } = useImageAttachments();
 
   const handleOnMarkdownUpdated = useCallback(
     (newMarkdown: string) => onChange(newMarkdown),
@@ -96,8 +99,27 @@ const MarkdownEditorComponent = ({
     [onChange]
   );
 
+  const handleOnPaste = useCallback(
+    (event: React.ClipboardEvent<HTMLTextAreaElement>): void => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
+      if (
+        event.clipboardData &&
+        event.clipboardData.items.length > 0 &&
+        clipboardContainsImage(event.clipboardData)
+      ) {
+        // event.preventDefault();
+        transformImages(event.clipboardData);
+        return;
+      }
+      console.log("There was no image pasted");
+    },
+    [clipboardContainsImage, transformImages]
+  );
+
   return (
     <VerticalDisplaySection>
+      {imageString && <img src={imageString} alt="hello" />}
       {editMode ? (
         <textarea
           ref={textArea}
@@ -105,6 +127,7 @@ const MarkdownEditorComponent = ({
           className={classes.textArea}
           onChange={handleOnChange}
           value={rawMarkdown}
+          onPaste={handleOnPaste}
         />
       ) : (
         renderedMarkdown

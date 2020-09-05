@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useContext
+} from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -19,6 +25,8 @@ import FolderIcon from "@material-ui/icons/Folder";
 import VerticalDisplaySection from "./layout/vertical-display-section";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
+import FilePathContext from "./contexts/file-path-context";
+import useDirectoryInitialization from "./hooks/use-directory-initialization";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -59,16 +67,13 @@ export type Note = {
 };
 
 const App = (): JSX.Element => {
+  useDirectoryInitialization();
+  const { notesFolderPath } = useContext(FilePathContext);
   const classes = useStyles();
+
   const [zenMode, setZenMode] = useState<boolean>(false);
   const [fileList, setFileList] = useState<string[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
-
-  const homeDir = useMemo<string>(() => os.homedir(), []);
-  const folderPath = useMemo<string>(
-    () => path.normalize(`${homeDir}/.notes`),
-    [homeDir]
-  );
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
@@ -78,26 +83,23 @@ const App = (): JSX.Element => {
   const openMarkdownFile = useCallback(
     (fileName: string): void => {
       const fileContent = fs.readFileSync(
-        path.normalize(`${folderPath}/${fileName}`),
+        path.normalize(`${notesFolderPath}/${fileName}`),
         { encoding: "utf-8" }
       );
       setCurrentNote({ fileName, content: fileContent });
     },
-    [folderPath]
+    [notesFolderPath]
   );
 
   const fetchFiles = useCallback((): void => {
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath);
-    }
-    const folderContent = fs.readdirSync(folderPath);
+    const folderContent = fs.readdirSync(notesFolderPath);
     setFileList(folderContent);
 
     if (folderContent.length) {
       // open first file and read from it
       openMarkdownFile(folderContent[0]);
     }
-  }, [folderPath, openMarkdownFile]);
+  }, [notesFolderPath, openMarkdownFile]);
 
   useEffect(() => {
     fetchFiles();
