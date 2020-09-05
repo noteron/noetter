@@ -13,6 +13,7 @@ import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
 import useFileReader, { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
+import TagsTree from "./features/tags-tree";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -114,9 +115,7 @@ const App = (): JSX.Element => {
         >
           {!zenMode && (
             <Grid item xs={2} className={classes.item}>
-              <VerticalDisplaySection>
-                <Typography>Tree goes here</Typography>
-              </VerticalDisplaySection>
+              <TagsTree files={fileList} />
             </Grid>
           )}
           {!zenMode && (

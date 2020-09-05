@@ -40,8 +40,8 @@ const NotesList = ({
   );
 
   return (
-    <List>
-      <ListItem style={{ fontWeight: "bold" }}>
+    <List dense>
+      <ListItem>
         <ListItemIcon>
           <FolderIcon />
         </ListItemIcon>
