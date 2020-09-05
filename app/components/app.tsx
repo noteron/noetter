@@ -5,10 +5,8 @@ import {
   CssBaseline,
   Grid,
   makeStyles,
-  createStyles,
-  Typography
+  createStyles
 } from "@material-ui/core";
-import VerticalDisplaySection from "./layout/vertical-display-section";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
 import useFileReader, { FileDescription } from "./hooks/use-file-reader";
@@ -62,6 +60,7 @@ const App = (): JSX.Element => {
   const [zenMode, setZenMode] = useState<boolean>(false);
   const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
+  const [selectedTags, setSelectedTags] = useState<string[]>();
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
@@ -77,16 +76,18 @@ const App = (): JSX.Element => {
   );
 
   const fetchFiles = useCallback(async (): Promise<void> => {
+    // TODO: Create specialized call in hook to simplify for consumer components
     const folderContent = readDirectorySync();
-
     const filesWithMetadata = await Promise.all(
       folderContent.map(readFileMetadataAsync)
     );
 
     setFileList(filesWithMetadata);
 
-    if (folderContent.length) {
-      openMarkdownFile(folderContent[0]);
+    if (filesWithMetadata.length) {
+      openMarkdownFile(filesWithMetadata[0].fileName);
+      const tagsList = filesWithMetadata[0].tags?.[0].split("/");
+      setSelectedTags(tagsList);
     }
   }, [openMarkdownFile, readDirectorySync, readFileMetadataAsync]);
 
@@ -115,13 +116,17 @@ const App = (): JSX.Element => {
         >
           {!zenMode && (
             <Grid item xs={2} className={classes.item}>
-              <TagsTree files={fileList} />
+              <TagsTree
+                files={fileList}
+                selectedTags={selectedTags}
+                onItemClick={setSelectedTags}
+              />
             </Grid>
           )}
           {!zenMode && (
             <Grid item xs={3} className={classes.item}>
               <NotesList
-                files={fileList}
+                files={fileList} // TODO: Filter on selected tags
                 openFileName={currentNote.fileName}
                 onItemClick={openMarkdownFile}
               />

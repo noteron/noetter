@@ -13,11 +13,21 @@ import { FileDescription } from "../../hooks/use-file-reader";
 
 type Props = {
   files: FileDescription[];
+  selectedTags: string[] | undefined;
+  onItemClick: (tagList: string[]) => void;
 };
 
-type Node = {
+export type TagNode = {
   name: string;
-  children?: Node[];
+  children?: TagNode[];
+};
+
+const createNodeTreeFromTagListOnly = (tagsList: string[]): TagNode => {
+  const [head, ...rest] = tagsList;
+  return {
+    name: head,
+    children: rest.length ? [createNodeTreeFromTagListOnly(rest)] : undefined
+  };
 };
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -32,24 +42,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const TagsTree = ({ files }: Props): JSX.Element => {
+const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
   const classes = useStyles();
 
-  const createNodeTreeFromTagListOnly = useCallback(
-    (tagsList: string[]): Node => {
-      const [head, ...rest] = tagsList;
-      return {
-        name: head,
-        children: rest.length
-          ? [createNodeTreeFromTagListOnly(rest)]
-          : undefined
-      };
-    },
-    []
-  );
-
   const updateNodeListWithMatchingTags = useCallback(
-    (nodeList: Node[], tagsList: string[]): void => {
+    (nodeList: TagNode[], tagsList: string[]): void => {
       // take first in list of tag parts
       const [head, ...rest] = tagsList;
       // check if it exists in list of nodes
@@ -75,11 +72,11 @@ const TagsTree = ({ files }: Props): JSX.Element => {
           : undefined
       });
     },
-    [createNodeTreeFromTagListOnly]
+    []
   );
 
-  const tags = useMemo<Node[]>(() => {
-    return files.reduce<Node[]>((rootNodes, current): Node[] => {
+  const tags = useMemo<TagNode[]>(() => {
+    return files.reduce<TagNode[]>((rootNodes, current): TagNode[] => {
       current.tags.forEach((tagString): void => {
         const tagStringList = tagString.split("/");
         if (!tagStringList.length) return;
@@ -89,32 +86,63 @@ const TagsTree = ({ files }: Props): JSX.Element => {
     }, []);
   }, [files, updateNodeListWithMatchingTags]);
 
+  const isSelected = useCallback(
+    (node: TagNode, selectedTagsList: string[] | undefined): boolean => {
+      if (!selectedTagsList) return false;
+      return selectedTagsList[0] === node.name;
+    },
+    []
+  );
+
   const renderTagNode = useCallback(
-    (node: Node, indented?: boolean): JSX.Element => (
-      <React.Fragment key={node.name}>
-        <ListItem
-          key={node.name}
-          className={indented ? classes.nested : undefined}
-        >
-          <ListItemText primary={node.name} />
-        </ListItem>
-        {node.children && (
-          <List
-            disablePadding
-            dense
-            className={indented ? classes.nested : undefined}
+    (
+      node: TagNode,
+      level: number,
+      selectedTagsList: string[] | undefined,
+      parentNames?: string[]
+    ): JSX.Element => {
+      const selected = isSelected(node, selectedTagsList);
+      return (
+        <React.Fragment key={node.name}>
+          <ListItem
+            key={node.name}
+            className={level ? classes.nested : undefined}
+            selected={selected}
+            button
+            onClick={() => onItemClick([...(parentNames ?? []), node.name])}
           >
-            {node.children.map((c) => renderTagNode(c, true))}
-          </List>
-        )}
-      </React.Fragment>
-    ),
-    [classes.nested]
+            <ListItemText primary={node.name} />
+          </ListItem>
+          {node.children && (
+            <List
+              disablePadding
+              dense
+              className={level ? classes.nested : undefined}
+            >
+              {node.children.map((c) => {
+                if (selected && selectedTagsList?.length) {
+                  const [, ...restOfTags] = selectedTagsList;
+                  return renderTagNode(c, level + 1, restOfTags, [
+                    ...(parentNames ?? []),
+                    node.name
+                  ]);
+                }
+                return renderTagNode(c, level + 1, undefined, [
+                  ...(parentNames ?? []),
+                  node.name
+                ]);
+              })}
+            </List>
+          )}
+        </React.Fragment>
+      );
+    },
+    [classes.nested, isSelected, onItemClick]
   );
 
   const memoizedTagsList = useMemo<JSX.Element[]>(
-    () => tags.map((t) => renderTagNode(t)),
-    [renderTagNode, tags]
+    () => tags.map((t) => renderTagNode(t, 0, selectedTags)),
+    [renderTagNode, selectedTags, tags]
   );
 
   return (
