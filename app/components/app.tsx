@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -61,6 +61,25 @@ const App = (): JSX.Element => {
   const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
   const [selectedTags, setSelectedTags] = useState<string[]>();
+
+  const filteredFileList = useMemo<FileDescription[]>(() => {
+    return fileList.filter((fileDescription) => {
+      if (!selectedTags) {
+        return true;
+      }
+      return fileDescription.tags.some((tagString) => {
+        const tagsList = tagString.split("/");
+        let noMissmatchFound = true;
+        selectedTags.forEach((selectedTag, index) => {
+          if (!noMissmatchFound) return;
+          if (selectedTag !== tagsList[index]) {
+            noMissmatchFound = false;
+          }
+        });
+        return noMissmatchFound;
+      });
+    });
+  }, [fileList, selectedTags]);
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
@@ -126,7 +145,7 @@ const App = (): JSX.Element => {
           {!zenMode && (
             <Grid item xs={3} className={classes.item}>
               <NotesList
-                files={fileList} // TODO: Filter on selected tags
+                files={filteredFileList}
                 openFileName={currentNote.fileName}
                 onItemClick={openMarkdownFile}
               />

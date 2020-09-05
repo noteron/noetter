@@ -102,17 +102,6 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
     []
   );
 
-  const getConnectedNodeCount = useCallback(
-    (node: TagNode): number =>
-      1 +
-      (node.children?.reduce<number>(
-        (aggregate, currentNode): number =>
-          aggregate + getConnectedNodeCount(currentNode),
-        0
-      ) ?? 0),
-    []
-  );
-
   const renderTagNode = useCallback(
     (
       node: TagNode,
@@ -133,11 +122,6 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
             onClick={() => onItemClick([...(parentNames ?? []), node.name])}
           >
             <ListItemText primary={node.name} />
-            <Chip
-              size="small"
-              variant="outlined"
-              label={getConnectedNodeCount(node)}
-            />
           </ListItem>
           {node.children && (
             <List disablePadding dense>
@@ -163,7 +147,7 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
         </React.Fragment>
       );
     },
-    [getConnectedNodeCount, isSelectedAndLastInTagsList, onItemClick]
+    [isSelectedAndLastInTagsList, onItemClick]
   );
 
   const memoizedTagsList = useMemo<JSX.Element[]>(
