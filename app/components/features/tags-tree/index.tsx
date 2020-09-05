@@ -106,19 +106,17 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
         <React.Fragment key={node.name}>
           <ListItem
             key={node.name}
-            className={level ? classes.nested : undefined}
             selected={selected}
             button
+            style={{
+              paddingLeft: 16 + 16 * level
+            }}
             onClick={() => onItemClick([...(parentNames ?? []), node.name])}
           >
             <ListItemText primary={node.name} />
           </ListItem>
           {node.children && (
-            <List
-              disablePadding
-              dense
-              className={level ? classes.nested : undefined}
-            >
+            <List disablePadding dense>
               {node.children.map((c) => {
                 if (selected && selectedTagsList?.length) {
                   const [, ...restOfTags] = selectedTagsList;
@@ -137,7 +135,7 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
         </React.Fragment>
       );
     },
-    [classes.nested, isSelected, onItemClick]
+    [isSelected, onItemClick]
   );
 
   const memoizedTagsList = useMemo<JSX.Element[]>(
