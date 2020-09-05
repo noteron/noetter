@@ -1,14 +1,29 @@
-import React from "react";
-import "./vertical-display-section.scss";
-import { Typography } from "@material-ui/core";
+import React, { ReactNode } from "react";
+import { Paper, makeStyles, createStyles } from "@material-ui/core";
 
-const VerticalDisplaySection = (): JSX.Element => {
+type Props = {
+  children: ReactNode | undefined;
+};
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    paper: {
+      padding: 20,
+      flexGrow: 1,
+      height: "100vh",
+      wordWrap: "break-word",
+      overflowWrap: "break-word",
+      overflowY: "auto"
+    }
+  })
+);
+
+const VerticalDisplaySection = ({ children }: Props): JSX.Element => {
+  const classes = useStyles();
   return (
-    <>
-      <Typography variant="h1" color="primary">
-        Notes
-      </Typography>
-    </>
+    <Paper variant="outlined" square className={classes.paper}>
+      {children}
+    </Paper>
   );
 };
 

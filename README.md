@@ -14,3 +14,8 @@ Project was set up using https://www.electronjs.org/docs/tutorial/first-app.
 - React: https://reactjs.org/
 - Typescript: https://www.typescriptlang.org/
 - Electron: https://www.electronjs.org/
+
+## Shortcuts
+
+- Toggle edit and view mode: CTRL + E
+- Toggle zen mode: CTRL + ALT + Z
