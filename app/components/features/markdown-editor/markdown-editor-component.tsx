@@ -6,10 +6,6 @@ import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType } from "./types";
 
-const inputMarkdown = `# 1
-## 2
-### 3`;
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     textArea: {
@@ -28,17 +24,24 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const MarkdownEditorComponent = (): JSX.Element => {
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [rawMarkdown, setRawMarkdown] = useState<string>(inputMarkdown);
+type Props = {
+  rawMarkdown: string;
+  onChange: (value: string) => void;
+};
+
+const MarkdownEditorComponent = ({
+  rawMarkdown,
+  onChange
+}: Props): JSX.Element => {
   const theme = useTheme();
   const classes = useStyles(theme);
   const renderedMarkdown = useMarkdown(rawMarkdown);
   const textArea = useRef<HTMLTextAreaElement>(null);
+  const [editMode, setEditMode] = useState<boolean>(false);
 
   const handleOnMarkdownUpdated = useCallback(
-    (newMarkdown: string) => setRawMarkdown(newMarkdown),
-    []
+    (newMarkdown: string) => onChange(newMarkdown),
+    [onChange]
   );
 
   const { insertOrReplaceAtPosition, writeDebugInfoToConsole } = useEditorTools(
@@ -88,10 +91,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   const handleOnChange = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-      setRawMarkdown(event.target.value);
-    },
-    []
+    (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
+      onChange(event.target.value),
+    [onChange]
   );
 
   return (
