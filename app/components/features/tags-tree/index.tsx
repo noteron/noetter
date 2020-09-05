@@ -6,7 +6,8 @@ import {
   ListItemText,
   makeStyles,
   createStyles,
-  Theme
+  Theme,
+  Chip
 } from "@material-ui/core";
 import { Label } from "@material-ui/icons";
 import { FileDescription } from "../../hooks/use-file-reader";
@@ -86,11 +87,29 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
     }, []);
   }, [files, updateNodeListWithMatchingTags]);
 
-  const isSelected = useCallback(
-    (node: TagNode, selectedTagsList: string[] | undefined): boolean => {
-      if (!selectedTagsList) return false;
-      return selectedTagsList[0] === node.name;
+  const isSelectedAndLastInTagsList = useCallback(
+    (
+      node: TagNode,
+      selectedTagsList: string[] | undefined
+    ): { match: boolean; exact: boolean } => {
+      if (!selectedTagsList) return { match: false, exact: false };
+      return {
+        match: selectedTagsList[0] === node.name,
+        exact:
+          selectedTagsList[0] === node.name && selectedTagsList.length === 1
+      };
     },
+    []
+  );
+
+  const getConnectedNodeCount = useCallback(
+    (node: TagNode): number =>
+      1 +
+      (node.children?.reduce<number>(
+        (aggregate, currentNode): number =>
+          aggregate + getConnectedNodeCount(currentNode),
+        0
+      ) ?? 0),
     []
   );
 
@@ -101,12 +120,12 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
       selectedTagsList: string[] | undefined,
       parentNames?: string[]
     ): JSX.Element => {
-      const selected = isSelected(node, selectedTagsList);
+      const selected = isSelectedAndLastInTagsList(node, selectedTagsList);
       return (
         <React.Fragment key={node.name}>
           <ListItem
             key={node.name}
-            selected={selected}
+            selected={selected.exact}
             button
             style={{
               paddingLeft: 16 + 16 * level
@@ -114,11 +133,20 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
             onClick={() => onItemClick([...(parentNames ?? []), node.name])}
           >
             <ListItemText primary={node.name} />
+            <Chip
+              size="small"
+              variant="outlined"
+              label={getConnectedNodeCount(node)}
+            />
           </ListItem>
           {node.children && (
             <List disablePadding dense>
               {node.children.map((c) => {
-                if (selected && selectedTagsList?.length) {
+                if (
+                  selected.match &&
+                  !selected.exact &&
+                  selectedTagsList?.length
+                ) {
                   const [, ...restOfTags] = selectedTagsList;
                   return renderTagNode(c, level + 1, restOfTags, [
                     ...(parentNames ?? []),
@@ -135,7 +163,7 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
         </React.Fragment>
       );
     },
-    [isSelected, onItemClick]
+    [getConnectedNodeCount, isSelectedAndLastInTagsList, onItemClick]
   );
 
   const memoizedTagsList = useMemo<JSX.Element[]>(
