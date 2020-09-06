@@ -52,11 +52,7 @@ export type Note = {
 
 const App = (): JSX.Element => {
   const classes = useStyles();
-  const {
-    readFileSync,
-    readDirectorySync,
-    readFileMetadataAsync
-  } = useFileReader();
+  const { readFileAsync, getFileDescriptions } = useFileReader();
   const [zenMode, setZenMode] = useState<boolean>(false);
   const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
@@ -87,19 +83,15 @@ const App = (): JSX.Element => {
   );
 
   const openMarkdownFile = useCallback(
-    (fileName: string): void => {
-      const fileContent = readFileSync(fileName);
+    async (fileName: string): Promise<void> => {
+      const fileContent = await readFileAsync(fileName);
       setCurrentNote({ fileName, content: fileContent });
     },
-    [readFileSync]
+    [readFileAsync]
   );
 
   const fetchFiles = useCallback(async (): Promise<void> => {
-    // TODO: Create specialized call in hook to simplify for consumer components
-    const folderContent = readDirectorySync();
-    const filesWithMetadata = await Promise.all(
-      folderContent.map(readFileMetadataAsync)
-    );
+    const filesWithMetadata = await getFileDescriptions();
 
     setFileList(filesWithMetadata);
 
@@ -108,7 +100,7 @@ const App = (): JSX.Element => {
       const tagsList = filesWithMetadata[0].tags?.[0].split("/");
       setSelectedTags(tagsList);
     }
-  }, [openMarkdownFile, readDirectorySync, readFileMetadataAsync]);
+  }, [getFileDescriptions, openMarkdownFile]);
 
   useEffect(() => {
     fetchFiles();

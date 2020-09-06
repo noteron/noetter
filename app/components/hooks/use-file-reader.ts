@@ -6,9 +6,8 @@ import { useCallback } from "react";
 
 export type FileReaderReturnProps = {
   applicationPath: string;
-  readFileSync: (fileName: string) => string;
-  readDirectorySync: () => string[];
-  readFileMetadataAsync: (fileName: string) => Promise<FileDescription>;
+  readFileAsync: (fileName: string) => Promise<string>;
+  getFileDescriptions: () => Promise<FileDescription[]>;
 };
 
 export type FileDescription = {
@@ -22,10 +21,22 @@ export type FileDescription = {
 const applicationPath = path.normalize(`${os.homedir()}/.notes`);
 
 const useFileReader = (): FileReaderReturnProps => {
-  const readFileSync = useCallback(
-    (fileName: string): string =>
-      fs.readFileSync(path.normalize(`${applicationPath}/${fileName}`), {
-        encoding: "utf-8"
+  const readFileAsync = useCallback(
+    async (fileName: string): Promise<string> =>
+      new Promise<string>((resolve, reject) => {
+        fs.readFile(
+          path.normalize(`${applicationPath}/${fileName}`),
+          {
+            encoding: "utf-8"
+          },
+          (err, data) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve(data);
+          }
+        );
       }),
     []
   );
@@ -95,11 +106,21 @@ const useFileReader = (): FileReaderReturnProps => {
     []
   );
 
+  const getFileDescriptions = useCallback(async (): Promise<
+    FileDescription[]
+  > => {
+    const folderContent = readDirectorySync();
+    const filesWithMetadata = await Promise.all(
+      folderContent.map(readFileMetadataAsync)
+    );
+
+    return filesWithMetadata;
+  }, [readDirectorySync, readFileMetadataAsync]);
+
   return {
     applicationPath,
-    readFileSync,
-    readDirectorySync,
-    readFileMetadataAsync
+    readFileAsync,
+    getFileDescriptions
   };
 };
 
