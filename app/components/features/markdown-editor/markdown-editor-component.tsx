@@ -4,7 +4,7 @@ import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
-import { InsertType } from "./types";
+import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -36,44 +36,82 @@ const MarkdownEditorComponent = ({
 }: Props): JSX.Element => {
   const theme = useTheme();
   const classes = useStyles(theme);
-  const renderedMarkdown = useMarkdown(rawMarkdown);
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
-  const [imageString, setImageString] = useState<string>();
-  const { transformImages, clipboardContainsImage } = useImageAttachments();
+  const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
+  const [lastCursorPosition, setLastCursorPosition] = useState<
+    CursorPosition
+  >();
+  const { saveImageFromClipboard } = useImageAttachments();
+  const {
+    insertOrReplaceAtPosition,
+    writeDebugInfoToConsole
+  } = useEditorTools();
+
+  const renderedMarkdown = useMarkdown(rawMarkdown);
 
   useEffect(() => {
     const ref = textArea.current;
-    if (editMode && ref) {
-      ref.focus();
-      const wantedCursorPosition = rawMarkdown.length;
-      ref.selectionStart = wantedCursorPosition;
-      ref.selectionEnd = wantedCursorPosition;
+    if (editMode && needToSetFocus && ref) {
+      if (ref.ATTRIBUTE_NODE) ref.focus();
+      const fallbackCursorPosition = rawMarkdown.length;
+      ref.selectionStart = lastCursorPosition?.start ?? fallbackCursorPosition;
+      ref.selectionEnd = lastCursorPosition?.end ?? fallbackCursorPosition;
+      ref.selectionDirection =
+        // eslint-disable-next-line no-nested-ternary
+        lastCursorPosition?.isForwardSelection === undefined
+          ? "none"
+          : lastCursorPosition.isForwardSelection
+          ? "forward"
+          : "backward";
+      setNeedToSetFocus(false);
     }
-  }, [editMode, rawMarkdown]);
+  }, [
+    editMode,
+    lastCursorPosition?.end,
+    lastCursorPosition?.isForwardSelection,
+    lastCursorPosition?.start,
+    needToSetFocus,
+    rawMarkdown.length
+  ]);
+
+  const updateLastCursorPosition = useCallback(() => {
+    const ref = textArea.current;
+    if (ref)
+      setLastCursorPosition({
+        start: ref.selectionStart,
+        end: ref.selectionEnd,
+        isForwardSelection: ref.selectionDirection === "forward",
+        isSelection: ref.selectionDirection === "none"
+      });
+  }, []);
 
   const handleOnMarkdownUpdated = useCallback(
-    (newMarkdown: string) => onChange(newMarkdown),
-    [onChange]
+    (newMarkdown: string) => {
+      updateLastCursorPosition();
+      onChange(newMarkdown);
+    },
+    [onChange, updateLastCursorPosition]
   );
 
-  const { insertOrReplaceAtPosition, writeDebugInfoToConsole } = useEditorTools(
-    rawMarkdown,
-    handleOnMarkdownUpdated
-  );
-
-  const handleOnToggleEditModeShortcut = useCallback(
-    () => setEditMode((prev: boolean) => !prev),
-    []
-  );
+  const handleOnToggleEditModeShortcut = useCallback(() => {
+    setEditMode((prev: boolean) => !prev);
+    setNeedToSetFocus(true);
+  }, []);
 
   const handleOnInsertCheckboxShortcut = useCallback(() => {
-    insertOrReplaceAtPosition(" - [ ] ", InsertType.RowStart, textArea);
-  }, [insertOrReplaceAtPosition]);
+    insertOrReplaceAtPosition(
+      " - [ ] ",
+      InsertType.RowStart,
+      textArea,
+      rawMarkdown,
+      handleOnMarkdownUpdated
+    );
+  }, [handleOnMarkdownUpdated, insertOrReplaceAtPosition, rawMarkdown]);
 
   const handleOnDebugShortcut = useCallback(
-    () => writeDebugInfoToConsole(textArea),
-    [writeDebugInfoToConsole]
+    () => writeDebugInfoToConsole(textArea, rawMarkdown),
+    [rawMarkdown, writeDebugInfoToConsole]
   );
 
   useShortcut(
@@ -103,41 +141,42 @@ const MarkdownEditorComponent = ({
     handleOnDebugShortcut
   );
 
-  const handleOnChange = useCallback(
+  const handleOnTextAreaChanged = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
-      onChange(event.target.value),
-    [onChange]
+      handleOnMarkdownUpdated(event.target.value),
+    [handleOnMarkdownUpdated]
   );
 
   const handleOnPaste = useCallback(
-    (event: React.ClipboardEvent<HTMLTextAreaElement>): void => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-
-      if (
-        event.clipboardData &&
-        event.clipboardData.items.length > 0 &&
-        clipboardContainsImage(event.clipboardData)
-      ) {
-        // event.preventDefault();
-        transformImages(event.clipboardData);
-        return;
-      }
-      console.log("There was no image pasted");
+    async (event: React.ClipboardEvent<HTMLTextAreaElement>): Promise<void> => {
+      const markdownLinkToImage = await saveImageFromClipboard(event);
+      insertOrReplaceAtPosition(
+        markdownLinkToImage,
+        InsertType.ReplaceSelection,
+        textArea,
+        rawMarkdown,
+        handleOnMarkdownUpdated
+      );
     },
-    [clipboardContainsImage, transformImages]
+    [
+      handleOnMarkdownUpdated,
+      insertOrReplaceAtPosition,
+      rawMarkdown,
+      saveImageFromClipboard
+    ]
   );
 
   return (
     <VerticalDisplaySection>
-      {imageString && <img src={imageString} alt="hello" />}
       {editMode ? (
         <textarea
           ref={textArea}
           draggable={false}
           className={classes.textArea}
-          onChange={handleOnChange}
+          onChange={handleOnTextAreaChanged}
           value={rawMarkdown}
           onPaste={handleOnPaste}
+          onKeyDown={updateLastCursorPosition}
         />
       ) : (
         renderedMarkdown

@@ -1,4 +1,4 @@
-import { CursorPosition, EditorRow } from "./types";
+import { CursorPosition, EditorRow } from "./editor-types";
 
 export const getCursorPosition = (
   ref: HTMLTextAreaElement

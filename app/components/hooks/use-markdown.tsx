@@ -1,10 +1,13 @@
 import { useMemo } from "react";
 import { compiler } from "markdown-to-jsx";
+import useImageAttachments from "../features/markdown-editor/hooks/use-image-attachments";
 
 const useMarkdown = (rawMarkdown: string): JSX.Element => {
-  const markdownAsJsx = useMemo<JSX.Element>(() => compiler(rawMarkdown), [
-    rawMarkdown
-  ]);
+  const { replaceAttachmentPlaceholders } = useImageAttachments();
+  const markdownAsJsx = useMemo<JSX.Element>(
+    () => compiler(replaceAttachmentPlaceholders(rawMarkdown)),
+    [rawMarkdown, replaceAttachmentPlaceholders]
+  );
 
   return markdownAsJsx;
 };
