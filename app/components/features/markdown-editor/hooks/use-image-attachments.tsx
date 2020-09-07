@@ -44,7 +44,6 @@ const useImageAttachments = (): UseImageAttachmentsState => {
         const item = data.items[0];
         if (item.type.indexOf("image") !== 0) return;
         blob = item.getAsFile();
-        blob = item.getAsFile();
         if (blob !== null) {
           const reader = new FileReader();
           reader.onload = (evt: ProgressEvent<FileReader>) => {
