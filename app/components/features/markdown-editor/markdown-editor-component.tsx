@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
@@ -41,6 +41,16 @@ const MarkdownEditorComponent = ({
   const [editMode, setEditMode] = useState<boolean>(false);
   const [imageString, setImageString] = useState<string>();
   const { transformImages, clipboardContainsImage } = useImageAttachments();
+
+  useEffect(() => {
+    const ref = textArea.current;
+    if (editMode && ref) {
+      ref.focus();
+      const wantedCursorPosition = rawMarkdown.length;
+      ref.selectionStart = wantedCursorPosition;
+      ref.selectionEnd = wantedCursorPosition;
+    }
+  }, [editMode, rawMarkdown]);
 
   const handleOnMarkdownUpdated = useCallback(
     (newMarkdown: string) => onChange(newMarkdown),
