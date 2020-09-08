@@ -18,12 +18,12 @@ export type FileDescription = {
 };
 
 const useFileReader = (): FileReaderReturnProps => {
-  const { rootFolderPath } = useContext(FilePathContext);
+  const { notesFolderPath } = useContext(FilePathContext);
   const readFileAsync = useCallback(
     async (fileName: string): Promise<string> =>
       new Promise<string>((resolve, reject) => {
         fs.readFile(
-          path.normalize(`${rootFolderPath}/${fileName}`),
+          path.normalize(`${notesFolderPath}/${fileName}`),
           {
             encoding: "utf-8"
           },
@@ -36,12 +36,12 @@ const useFileReader = (): FileReaderReturnProps => {
           }
         );
       }),
-    [rootFolderPath]
+    [notesFolderPath]
   );
 
   const readDirectorySync = useCallback(
-    (): string[] => fs.readdirSync(rootFolderPath),
-    [rootFolderPath]
+    (): string[] => fs.readdirSync(notesFolderPath),
+    [notesFolderPath]
   );
 
   const readFileMetadataAsync = useCallback(
@@ -51,7 +51,7 @@ const useFileReader = (): FileReaderReturnProps => {
         const rowsToRead = 5;
 
         const readStream = fs.createReadStream(
-          path.normalize(`${rootFolderPath}/${fileName}`)
+          path.normalize(`${notesFolderPath}/${fileName}`)
         );
         const reader = readline.createInterface({
           input: readStream
@@ -99,7 +99,7 @@ const useFileReader = (): FileReaderReturnProps => {
           }
         });
       }),
-    [rootFolderPath]
+    [notesFolderPath]
   );
 
   const getFileDescriptions = useCallback(async (): Promise<

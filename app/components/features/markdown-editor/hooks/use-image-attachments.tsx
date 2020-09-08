@@ -68,7 +68,7 @@ const useImageAttachments = (): UseImageAttachmentsState => {
   const replaceAttachmentPlaceholders = useCallback(
     (markdown: string): string => {
       let markdownToRender: string = markdown;
-      while (markdownToRender.includes(ATTACHMENT_PLACEHOLDER)) {
+      while (markdownToRender.match(IMAGE_LINK_SELECTOR_REGEX)) {
         markdownToRender = markdownToRender.replace(
           IMAGE_LINK_SELECTOR_REGEX,
           (imageLink: string): string =>
