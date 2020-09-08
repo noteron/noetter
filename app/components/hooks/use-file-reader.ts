@@ -1,11 +1,10 @@
 import fs from "fs";
 import path from "path";
 import readline from "readline";
-import os from "os";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
+import FilePathContext from "../contexts/file-path-context";
 
 export type FileReaderReturnProps = {
-  applicationPath: string;
   readFileAsync: (fileName: string) => Promise<string>;
   getFileDescriptions: () => Promise<FileDescription[]>;
 };
@@ -18,14 +17,13 @@ export type FileDescription = {
   modified: number;
 };
 
-const applicationPath = path.normalize(`${os.homedir()}/.notes`);
-
 const useFileReader = (): FileReaderReturnProps => {
+  const { rootFolderPath } = useContext(FilePathContext);
   const readFileAsync = useCallback(
     async (fileName: string): Promise<string> =>
       new Promise<string>((resolve, reject) => {
         fs.readFile(
-          path.normalize(`${applicationPath}/${fileName}`),
+          path.normalize(`${rootFolderPath}/${fileName}`),
           {
             encoding: "utf-8"
           },
@@ -38,15 +36,13 @@ const useFileReader = (): FileReaderReturnProps => {
           }
         );
       }),
-    []
+    [rootFolderPath]
   );
 
-  const readDirectorySync = useCallback((): string[] => {
-    if (!fs.existsSync(applicationPath)) {
-      fs.mkdirSync(applicationPath);
-    }
-    return fs.readdirSync(applicationPath);
-  }, []);
+  const readDirectorySync = useCallback(
+    (): string[] => fs.readdirSync(rootFolderPath),
+    [rootFolderPath]
+  );
 
   const readFileMetadataAsync = useCallback(
     async (fileName: string): Promise<FileDescription> =>
@@ -55,7 +51,7 @@ const useFileReader = (): FileReaderReturnProps => {
         const rowsToRead = 5;
 
         const readStream = fs.createReadStream(
-          path.normalize(`${applicationPath}/${fileName}`)
+          path.normalize(`${rootFolderPath}/${fileName}`)
         );
         const reader = readline.createInterface({
           input: readStream
@@ -103,7 +99,7 @@ const useFileReader = (): FileReaderReturnProps => {
           }
         });
       }),
-    []
+    [rootFolderPath]
   );
 
   const getFileDescriptions = useCallback(async (): Promise<
@@ -118,7 +114,6 @@ const useFileReader = (): FileReaderReturnProps => {
   }, [readDirectorySync, readFileMetadataAsync]);
 
   return {
-    applicationPath,
     readFileAsync,
     getFileDescriptions
   };

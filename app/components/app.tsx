@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useContext
+} from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -12,6 +18,8 @@ import useShortcut from "./hooks/use-shortcut";
 import useFileReader, { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
+import FilePathContext from "./contexts/file-path-context";
+import useDirectoryInitialization from "./hooks/use-directory-initialization";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -51,6 +59,7 @@ export type Note = {
 };
 
 const App = (): JSX.Element => {
+  useDirectoryInitialization();
   const classes = useStyles();
   const { readFileAsync, getFileDescriptions } = useFileReader();
   const [zenMode, setZenMode] = useState<boolean>(false);

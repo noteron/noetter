@@ -266,7 +266,6 @@
     "electron-log": "^4.2.2",
     "electron-updater": "^4.3.1",
     "fontsource-roboto": "^3.0.3",
-    "hack-font": "^3.3.0",
     "history": "^4.7.2",
     "markdown-to-jsx": "^6.11.4",
     "react": "^16.13.1",
