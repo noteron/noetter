@@ -11,20 +11,13 @@ import {
   CssBaseline,
   Grid,
   makeStyles,
-  createStyles,
-  Typography,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText
+  createStyles
 } from "@material-ui/core";
-import fs from "fs";
-import path from "path";
-import os from "os";
-import FolderIcon from "@material-ui/icons/Folder";
-import VerticalDisplaySection from "./layout/vertical-display-section";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
+import useFileReader, { FileDescription } from "./hooks/use-file-reader";
+import NotesList from "./features/notes-list";
+import TagsTree from "./features/tags-tree";
 import FilePathContext from "./contexts/file-path-context";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
 
@@ -50,7 +43,6 @@ const useStyles = makeStyles(() =>
       height: "100%",
       overflowX: "hidden",
       overflowY: "hidden",
-      fontSize: 20,
       fontFamily: "Roboto"
     },
     item: {
@@ -68,12 +60,31 @@ export type Note = {
 
 const App = (): JSX.Element => {
   useDirectoryInitialization();
-  const { notesFolderPath } = useContext(FilePathContext);
   const classes = useStyles();
-
+  const { readFileAsync, getFileDescriptions } = useFileReader();
   const [zenMode, setZenMode] = useState<boolean>(false);
-  const [fileList, setFileList] = useState<string[]>([]);
+  const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
+  const [selectedTags, setSelectedTags] = useState<string[]>();
+
+  const filteredFileList = useMemo<FileDescription[]>(() => {
+    return fileList.filter((fileDescription) => {
+      if (!selectedTags) {
+        return true;
+      }
+      return fileDescription.tags.some((tagString) => {
+        const tagsList = tagString.split("/");
+        let noMissmatchFound = true;
+        selectedTags.forEach((selectedTag, index) => {
+          if (!noMissmatchFound) return;
+          if (selectedTag !== tagsList[index]) {
+            noMissmatchFound = false;
+          }
+        });
+        return noMissmatchFound;
+      });
+    });
+  }, [fileList, selectedTags]);
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
@@ -81,25 +92,24 @@ const App = (): JSX.Element => {
   );
 
   const openMarkdownFile = useCallback(
-    (fileName: string): void => {
-      const fileContent = fs.readFileSync(
-        path.normalize(`${notesFolderPath}/${fileName}`),
-        { encoding: "utf-8" }
-      );
+    async (fileName: string): Promise<void> => {
+      const fileContent = await readFileAsync(fileName);
       setCurrentNote({ fileName, content: fileContent });
     },
-    [notesFolderPath]
+    [readFileAsync]
   );
 
-  const fetchFiles = useCallback((): void => {
-    const folderContent = fs.readdirSync(notesFolderPath);
-    setFileList(folderContent);
+  const fetchFiles = useCallback(async (): Promise<void> => {
+    const filesWithMetadata = await getFileDescriptions();
 
-    if (folderContent.length) {
-      // open first file and read from it
-      openMarkdownFile(folderContent[0]);
+    setFileList(filesWithMetadata);
+
+    if (filesWithMetadata.length) {
+      openMarkdownFile(filesWithMetadata[0].fileName);
+      const tagsList = filesWithMetadata[0].tags?.[0].split("/");
+      setSelectedTags(tagsList);
     }
-  }, [notesFolderPath, openMarkdownFile]);
+  }, [getFileDescriptions, openMarkdownFile]);
 
   useEffect(() => {
     fetchFiles();
@@ -114,27 +124,6 @@ const App = (): JSX.Element => {
     toggleZenMode
   );
 
-  const memoizedFileList = useMemo<React.ReactNode>(
-    () =>
-      fileList.length ? (
-        fileList.map((fileName) => (
-          <ListItem
-            button
-            selected={currentNote.fileName === fileName}
-            onClick={() => {
-              openMarkdownFile(fileName);
-            }}
-            key={fileName}
-          >
-            {fileName}
-          </ListItem>
-        ))
-      ) : (
-        <Typography>No files created</Typography>
-      ),
-    [currentNote.fileName, fileList, openMarkdownFile]
-  );
-
   return (
     <>
       <ThemeProvider theme={darkTheme}>
@@ -147,23 +136,20 @@ const App = (): JSX.Element => {
         >
           {!zenMode && (
             <Grid item xs={2} className={classes.item}>
-              <VerticalDisplaySection>
-                <Typography>Tree goes here</Typography>
-              </VerticalDisplaySection>
+              <TagsTree
+                files={fileList}
+                selectedTags={selectedTags}
+                onItemClick={setSelectedTags}
+              />
             </Grid>
           )}
-
           {!zenMode && (
             <Grid item xs={3} className={classes.item}>
-              <List>
-                <ListItem style={{ fontWeight: "bold" }}>
-                  <ListItemIcon>
-                    <FolderIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={`Notes (${fileList.length})`} />
-                </ListItem>
-                {memoizedFileList}
-              </List>
+              <NotesList
+                files={filteredFileList}
+                openFileName={currentNote.fileName}
+                onItemClick={openMarkdownFile}
+              />
             </Grid>
           )}
           <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
