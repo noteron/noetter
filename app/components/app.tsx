@@ -1,25 +1,19 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useContext
-} from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
   CssBaseline,
-  Grid,
   makeStyles,
-  createStyles
+  createStyles,
+  Grid
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
 import useFileReader, { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
-import FilePathContext from "./contexts/file-path-context";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
+import useFileWriter from "./hooks/use-file-writer";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -58,13 +52,24 @@ export type Note = {
   fileName?: string;
 };
 
+const getNewNoteTemplate = (): Note => ({
+  content: `---
+title: Untitled
+pinned: false
+tags: [Untagged]
+---
+
+# Untitled`
+});
+
 const App = (): JSX.Element => {
   useDirectoryInitialization();
   const classes = useStyles();
   const { readFileAsync, getFileDescriptions } = useFileReader();
+  const { saveNewFile, saveExistingFile } = useFileWriter();
   const [zenMode, setZenMode] = useState<boolean>(false);
   const [fileList, setFileList] = useState<FileDescription[]>([]);
-  const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
+  const [currentNote, setCurrentNote] = useState<Note>(getNewNoteTemplate());
   const [selectedTags, setSelectedTags] = useState<string[]>();
 
   const filteredFileList = useMemo<FileDescription[]>(() => {
@@ -115,6 +120,25 @@ const App = (): JSX.Element => {
     fetchFiles();
   }, [fetchFiles]);
 
+  const createNewFile = useCallback((): void => {
+    setCurrentNote(getNewNoteTemplate());
+  }, []);
+
+  const handleOnSave = useCallback(async () => {
+    if (currentNote.fileName) {
+      await saveExistingFile(currentNote.content, currentNote.fileName);
+    }
+    const fileName = await saveNewFile(currentNote.content);
+    setCurrentNote((prev: Note): Note => ({ ...prev, fileName }));
+    fetchFiles();
+  }, [
+    currentNote.content,
+    currentNote.fileName,
+    fetchFiles,
+    saveExistingFile,
+    saveNewFile
+  ]);
+
   useShortcut(
     {
       altKey: true,
@@ -122,6 +146,23 @@ const App = (): JSX.Element => {
       key: "z"
     },
     toggleZenMode
+  );
+
+  useShortcut(
+    {
+      altKey: false,
+      ctrlKey: true,
+      key: "n"
+    },
+    createNewFile
+  );
+  useShortcut(
+    {
+      altKey: false,
+      ctrlKey: true,
+      key: "s"
+    },
+    handleOnSave
   );
 
   return (
