@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -9,11 +9,12 @@ import {
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
-import useFileReader, { FileDescription } from "./hooks/use-file-reader";
+import { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
-import useFileWriter from "./hooks/use-file-writer";
+import useNoteManagement from "./hooks/use-note-management";
+import NoteManagementContext from "./contexts/note-management-context";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -52,92 +53,42 @@ export type Note = {
   fileName?: string;
 };
 
-const getNewNoteTemplate = (): Note => ({
-  content: `---
-title: Untitled
-pinned: false
-tags: [Untagged]
----
-
-# Untitled`
-});
-
 const App = (): JSX.Element => {
   useDirectoryInitialization();
+  const noteManagement = useNoteManagement();
   const classes = useStyles();
-  const { readFileAsync, getFileDescriptions } = useFileReader();
-  const { saveNewFile, saveExistingFile } = useFileWriter();
   const [zenMode, setZenMode] = useState<boolean>(false);
-  const [fileList, setFileList] = useState<FileDescription[]>([]);
-  const [currentNote, setCurrentNote] = useState<Note>(getNewNoteTemplate());
-  const [selectedTags, setSelectedTags] = useState<string[]>();
 
   const filteredFileList = useMemo<FileDescription[]>(() => {
-    return fileList.filter((fileDescription) => {
-      if (!selectedTags) {
-        return true;
-      }
-      return fileDescription.tags.some((tagString) => {
-        const tagsList = tagString.split("/");
-        let noMissmatchFound = true;
-        selectedTags.forEach((selectedTag, index) => {
-          if (!noMissmatchFound) return;
-          if (selectedTag !== tagsList[index]) {
-            noMissmatchFound = false;
-          }
+    return (noteManagement.allAvailableNotes ?? []).filter(
+      (fileDescription) => {
+        if (!noteManagement.selectedTags) {
+          return true;
+        }
+        return fileDescription.tags.some((tagString) => {
+          const tagsList = tagString.split("/");
+          let noMissmatchFound = true;
+          (noteManagement.selectedTags ?? []).forEach((selectedTag, index) => {
+            if (!noMissmatchFound) return;
+            if (selectedTag !== tagsList[index]) {
+              noMissmatchFound = false;
+            }
+          });
+          return noMissmatchFound;
         });
-        return noMissmatchFound;
-      });
-    });
-  }, [fileList, selectedTags]);
+      }
+    );
+  }, [noteManagement.allAvailableNotes, noteManagement?.selectedTags]);
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
     []
   );
 
-  const openMarkdownFile = useCallback(
-    async (fileName: string): Promise<void> => {
-      const fileContent = await readFileAsync(fileName);
-      setCurrentNote({ fileName, content: fileContent });
-    },
-    [readFileAsync]
-  );
-
-  const fetchFiles = useCallback(async (): Promise<void> => {
-    const filesWithMetadata = await getFileDescriptions();
-
-    setFileList(filesWithMetadata);
-
-    if (filesWithMetadata.length) {
-      openMarkdownFile(filesWithMetadata[0].fileName);
-      const tagsList = filesWithMetadata[0].tags?.[0].split("/");
-      setSelectedTags(tagsList);
-    }
-  }, [getFileDescriptions, openMarkdownFile]);
-
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
-
-  const createNewFile = useCallback((): void => {
-    setCurrentNote(getNewNoteTemplate());
-  }, []);
-
-  const handleOnSave = useCallback(async () => {
-    if (currentNote.fileName) {
-      await saveExistingFile(currentNote.content, currentNote.fileName);
-    }
-    const fileName = await saveNewFile(currentNote.content);
-    setCurrentNote((prev: Note): Note => ({ ...prev, fileName }));
-    fetchFiles();
-  }, [
-    currentNote.content,
-    currentNote.fileName,
-    fetchFiles,
-    saveExistingFile,
-    saveNewFile
-  ]);
+  const handleOnSave = useCallback(() => {
+    if (!noteManagement.saveNote) return;
+    noteManagement.saveNote();
+  }, [noteManagement]);
 
   useShortcut(
     {
@@ -154,7 +105,7 @@ const App = (): JSX.Element => {
       ctrlKey: true,
       key: "n"
     },
-    createNewFile
+    noteManagement.createNewNote
   );
   useShortcut(
     {
@@ -167,42 +118,37 @@ const App = (): JSX.Element => {
 
   return (
     <>
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <Grid
-          container
-          justify="center"
-          direction="row"
-          className={classes.root}
-        >
-          {!zenMode && (
-            <Grid item xs={2} className={classes.item}>
-              <TagsTree
-                files={fileList}
-                selectedTags={selectedTags}
-                onItemClick={setSelectedTags}
-              />
+      <NoteManagementContext.Provider value={noteManagement}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <Grid
+            container
+            justify="center"
+            direction="row"
+            className={classes.root}
+          >
+            {!zenMode && (
+              <Grid item xs={2} className={classes.item}>
+                <TagsTree
+                  files={noteManagement.allAvailableNotes ?? []}
+                  selectedTags={noteManagement.selectedTags}
+                />
+              </Grid>
+            )}
+            {!zenMode && (
+              <Grid item xs={3} className={classes.item}>
+                <NotesList
+                  files={filteredFileList}
+                  openFileName={noteManagement.currentNote?.fileName}
+                />
+              </Grid>
+            )}
+            <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
+              <MarkdownEditor />
             </Grid>
-          )}
-          {!zenMode && (
-            <Grid item xs={3} className={classes.item}>
-              <NotesList
-                files={filteredFileList}
-                openFileName={currentNote.fileName}
-                onItemClick={openMarkdownFile}
-              />
-            </Grid>
-          )}
-          <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
-            <MarkdownEditor
-              rawMarkdown={currentNote.content}
-              onChange={(value) => {
-                setCurrentNote((prev) => ({ ...prev, content: value }));
-              }}
-            />
           </Grid>
-        </Grid>
-      </ThemeProvider>
+        </ThemeProvider>
+      </NoteManagementContext.Provider>
     </>
   );
 };

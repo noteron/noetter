@@ -12,9 +12,13 @@ export type CurrentNote = {
 
 export type NoteManagementContextState = {
   currentNote?: CurrentNote;
+  updateCurrentNote?: (updatedNote: CurrentNote) => void;
+  selectedTags?: string[];
+  selectTags?: (newTags: string[]) => void;
+  openNote?: (availableNote: FileDescription) => Promise<void>;
   createNewNote?: () => void;
   saveNote?: () => Promise<void>;
-  AllNotes?: FileDescription[];
+  allAvailableNotes?: FileDescription[];
 };
 
 const NoteManagementContext = createContext<NoteManagementContextState>({});

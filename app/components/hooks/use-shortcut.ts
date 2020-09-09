@@ -8,7 +8,7 @@ export type KeyCombination = {
 
 const useShortcut = (
   keyCombination: KeyCombination,
-  callback: () => void
+  callback?: () => void
 ): void => {
   const handleKeydown = useCallback(
     (event: KeyboardEvent): void => {

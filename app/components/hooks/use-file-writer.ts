@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import FilePathContext from "../contexts/file-path-context";
 
-const MAIN_TITLE_REGEX = /^# .+/;
+export const MAIN_TITLE_REGEX = /^# .+/;
 export const DEFAULT_FILE_NAME = "Untitled";
 
 type UseFileWriterProps = {

@@ -1,4 +1,11 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useContext,
+  useMemo
+} from "react";
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
@@ -6,6 +13,7 @@ import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
+import NoteManagementContext from "../../contexts/note-management-context";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -25,17 +33,10 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-type Props = {
-  rawMarkdown: string;
-  onChange: (value: string) => void;
-};
-
-const MarkdownEditorComponent = ({
-  rawMarkdown,
-  onChange
-}: Props): JSX.Element => {
+const MarkdownEditorComponent = (): JSX.Element => {
   const theme = useTheme();
   const classes = useStyles(theme);
+  const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
@@ -48,7 +49,10 @@ const MarkdownEditorComponent = ({
     writeDebugInfoToConsole
   } = useEditorTools();
 
-  const renderedMarkdown = useMarkdown(rawMarkdown);
+  const rawMarkdown = useMemo<string>(() => currentNote?.markdown ?? "", [
+    currentNote?.markdown
+  ]);
+  const renderedMarkdown = useMarkdown(currentNote?.markdown ?? "");
 
   useEffect(() => {
     const ref = textArea.current;
@@ -88,10 +92,25 @@ const MarkdownEditorComponent = ({
 
   const handleOnMarkdownUpdated = useCallback(
     (newMarkdown: string) => {
+      if (!updateCurrentNote) return;
       updateLastCursorPosition();
-      onChange(newMarkdown);
+      updateCurrentNote({
+        created: currentNote?.created ?? Date.now(),
+        modified: Date.now(),
+        tags: currentNote?.tags ?? ["Untagged"],
+        title: currentNote?.title ?? "Untitled",
+        fileName: currentNote?.fileName,
+        markdown: newMarkdown
+      });
     },
-    [onChange, updateLastCursorPosition]
+    [
+      currentNote?.created,
+      currentNote?.fileName,
+      currentNote?.tags,
+      currentNote?.title,
+      updateCurrentNote,
+      updateLastCursorPosition
+    ]
   );
 
   const handleOnToggleEditModeShortcut = useCallback(() => {

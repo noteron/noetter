@@ -1,19 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useContext } from "react";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { Note } from "@material-ui/icons";
 import { FileDescription } from "../../hooks/use-file-reader";
+import NoteManagementContext from "../../contexts/note-management-context";
 
 type Props = {
   files: FileDescription[];
   openFileName: string | undefined;
-  onItemClick: (fileName: string) => void;
 };
 
-const NotesList = ({
-  files,
-  openFileName,
-  onItemClick
-}: Props): JSX.Element => {
+const NotesList = ({ files, openFileName }: Props): JSX.Element => {
+  const { openNote } = useContext(NoteManagementContext);
   const numberOfFiles = useMemo<number>(() => files.length, [files.length]);
   const memoizedFileList = useMemo<React.ReactNode>(
     () =>
@@ -23,7 +20,7 @@ const NotesList = ({
             button
             selected={openFileName === file.fileName}
             onClick={() => {
-              onItemClick(file.fileName);
+              if (openNote) openNote(file);
             }}
             key={file.fileName}
           >
@@ -33,7 +30,7 @@ const NotesList = ({
       ) : (
         <ListItem disabled>No notes created</ListItem>
       ),
-    [files, numberOfFiles, onItemClick, openFileName]
+    [files, numberOfFiles, openFileName, openNote]
   );
 
   return (
