@@ -16,6 +16,10 @@ import useDirectoryInitialization from "./hooks/use-directory-initialization";
 import useNoteManagement from "./hooks/use-note-management";
 import NoteManagementContext from "./contexts/note-management-context";
 
+// TODO: Make sure metadata is set and reloaded on save
+// TODO: Debug saving so it actually happens both to old and new file
+// TODO: Make sure saving does not add new lines to the file
+
 const darkTheme = createMuiTheme({
   palette: {
     type: "dark",

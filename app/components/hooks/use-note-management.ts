@@ -108,6 +108,22 @@ const useNoteManagement = (): NoteManagementContextState => {
       updatedNote.fileName ?? DEFAULT_FILE_NAME
     );
     setCurrentNote(updatedNote);
+    setFileList((prev: FileDescription[] | undefined) =>
+      (prev ?? []).map(
+        (file: FileDescription): FileDescription => {
+          if (file.fileName === updatedNote.fileName) {
+            return {
+              ...file,
+              title: updatedNote.title,
+              created: updatedNote.created,
+              modified: updatedNote.modified,
+              tags: updatedNote.tags
+            };
+          }
+          return file;
+        }
+      )
+    );
   }, [currentNote, saveExistingFile]);
 
   const handleSaveNewNote = useCallback(async () => {
