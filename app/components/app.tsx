@@ -11,7 +11,8 @@ import {
   CssBaseline,
   Grid,
   makeStyles,
-  createStyles
+  createStyles,
+  Drawer
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
@@ -66,6 +67,7 @@ const App = (): JSX.Element => {
   const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
   const [selectedTags, setSelectedTags] = useState<string[]>();
+  const [settingsDrawer, setSettingsDrawer] = useState<boolean>(false);
 
   const filteredFileList = useMemo<FileDescription[]>(() => {
     return fileList.filter((fileDescription) => {
@@ -106,8 +108,6 @@ const App = (): JSX.Element => {
 
     if (filesWithMetadata.length) {
       openMarkdownFile(filesWithMetadata[0].fileName);
-      const tagsList = filesWithMetadata[0].tags?.[0].split("/");
-      setSelectedTags(tagsList);
     }
   }, [getFileDescriptions, openMarkdownFile]);
 
@@ -123,6 +123,12 @@ const App = (): JSX.Element => {
     },
     toggleZenMode
   );
+
+  const handleOnSettingsClick = useCallback(() => {
+    setSettingsDrawer(true);
+  }, []);
+
+  const handleOnCloseSettings = useCallback(() => setSettingsDrawer(false), []);
 
   return (
     <>
@@ -140,6 +146,7 @@ const App = (): JSX.Element => {
                 files={fileList}
                 selectedTags={selectedTags}
                 onItemClick={setSelectedTags}
+                onSettingsClick={handleOnSettingsClick}
               />
             </Grid>
           )}
@@ -161,6 +168,13 @@ const App = (): JSX.Element => {
             />
           </Grid>
         </Grid>
+        <Drawer
+          anchor="right"
+          open={settingsDrawer}
+          onClose={handleOnCloseSettings}
+        >
+          Settings! Select root folder
+        </Drawer>
       </ThemeProvider>
     </>
   );

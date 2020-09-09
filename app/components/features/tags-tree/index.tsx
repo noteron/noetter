@@ -6,16 +6,16 @@ import {
   ListItemText,
   makeStyles,
   createStyles,
-  Theme,
-  Chip
+  Theme
 } from "@material-ui/core";
-import { Label } from "@material-ui/icons";
+import { Label, Settings } from "@material-ui/icons";
 import { FileDescription } from "../../hooks/use-file-reader";
 
 type Props = {
   files: FileDescription[];
   selectedTags: string[] | undefined;
   onItemClick: (tagList: string[]) => void;
+  onSettingsClick: () => void;
 };
 
 export type TagNode = {
@@ -35,7 +35,9 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       backgroundColor: theme.palette.background.paper,
-      height: "100%"
+      height: "100%",
+      display: "flex",
+      flexDirection: "column"
     },
     nested: {
       paddingLeft: theme.spacing(4)
@@ -43,7 +45,12 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
+const TagsTree = ({
+  files,
+  selectedTags,
+  onItemClick,
+  onSettingsClick
+}: Props): JSX.Element => {
   const classes = useStyles();
 
   const updateNodeListWithMatchingTags = useCallback(
@@ -156,15 +163,25 @@ const TagsTree = ({ files, selectedTags, onItemClick }: Props): JSX.Element => {
   );
 
   return (
-    <List className={classes.root} dense>
-      <ListItem>
-        <ListItemIcon>
-          <Label />
-        </ListItemIcon>
-        <ListItemText primary="Tags" />
-      </ListItem>
-      {memoizedTagsList}
-    </List>
+    <div className={classes.root}>
+      <List dense style={{ flex: "1" }}>
+        <ListItem>
+          <ListItemIcon>
+            <Label />
+          </ListItemIcon>
+          <ListItemText primary="Tags" />
+        </ListItem>
+        {memoizedTagsList}
+      </List>
+      <List>
+        <ListItem button onClick={onSettingsClick}>
+          <ListItemIcon>
+            <Settings />
+          </ListItemIcon>
+          <ListItemText primary="Settings" />
+        </ListItem>
+      </List>
+    </div>
   );
 };
 
