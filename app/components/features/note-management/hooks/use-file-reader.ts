@@ -2,19 +2,16 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import { useCallback, useContext } from "react";
-import FilePathContext from "../contexts/file-path-context";
+import FilePathContext from "../../../contexts/file-path-context";
+import { FileDescription } from "../note-management-types";
+import {
+  getFileNameWithExtension,
+  getFileNameWithoutExtension
+} from "../helpers/note-management-helpers";
 
 export type FileReaderReturnProps = {
   readFileAsync: (fileName: string) => Promise<string>;
   getFileDescriptions: () => Promise<FileDescription[]>;
-};
-
-export type FileDescription = {
-  fileName: string;
-  title: string;
-  tags: string[];
-  created: number;
-  modified: number;
 };
 
 const useFileReader = (): FileReaderReturnProps => {
@@ -23,7 +20,9 @@ const useFileReader = (): FileReaderReturnProps => {
     async (fileName: string): Promise<string> =>
       new Promise<string>((resolve, reject) => {
         fs.readFile(
-          path.normalize(`${notesFolderPath}/${fileName}`),
+          path.normalize(
+            `${notesFolderPath}/${getFileNameWithExtension(fileName)}`
+          ),
           {
             encoding: "utf-8"
           },
@@ -90,11 +89,12 @@ const useFileReader = (): FileReaderReturnProps => {
             reader.close();
             readStream.destroy();
             resolve({
-              fileName,
+              fileNameWithoutExtension: getFileNameWithoutExtension(fileName),
               title,
               tags,
               created,
-              modified
+              modified,
+              fileExists: true
             });
           }
         });

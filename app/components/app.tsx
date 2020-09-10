@@ -9,16 +9,12 @@ import {
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
-import { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
-import useNoteManagement from "./hooks/use-note-management";
-import NoteManagementContext from "./contexts/note-management-context";
-
-// TODO: Make sure metadata is set and reloaded on save
-// TODO: Debug saving so it actually happens both to old and new file
-// TODO: Make sure saving does not add new lines to the file
+import useNoteManagement from "./features/note-management/hooks/use-note-management";
+import NoteManagementContext from "./features/note-management/contexts/note-management-context";
+import { FileDescription } from "./features/note-management/note-management-types";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -62,27 +58,6 @@ const App = (): JSX.Element => {
   const noteManagement = useNoteManagement();
   const classes = useStyles();
   const [zenMode, setZenMode] = useState<boolean>(false);
-
-  const filteredFileList = useMemo<FileDescription[]>(() => {
-    return (noteManagement.allAvailableNotes ?? []).filter(
-      (fileDescription) => {
-        if (!noteManagement.selectedTags) {
-          return true;
-        }
-        return fileDescription.tags.some((tagString) => {
-          const tagsList = tagString.split("/");
-          let noMissmatchFound = true;
-          (noteManagement.selectedTags ?? []).forEach((selectedTag, index) => {
-            if (!noMissmatchFound) return;
-            if (selectedTag !== tagsList[index]) {
-              noMissmatchFound = false;
-            }
-          });
-          return noMissmatchFound;
-        });
-      }
-    );
-  }, [noteManagement.allAvailableNotes, noteManagement?.selectedTags]);
 
   const toggleZenMode = useCallback(
     () => setZenMode((prev: boolean) => !prev),
@@ -141,10 +116,7 @@ const App = (): JSX.Element => {
             )}
             {!zenMode && (
               <Grid item xs={3} className={classes.item}>
-                <NotesList
-                  files={filteredFileList}
-                  openFileName={noteManagement.currentNote?.fileName}
-                />
+                <NotesList />
               </Grid>
             )}
             <Grid item xs={zenMode ? 12 : 7} className={classes.item}>

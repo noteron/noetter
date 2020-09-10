@@ -1,14 +1,5 @@
 import { createContext } from "react";
-import { FileDescription } from "../hooks/use-file-reader";
-
-export type CurrentNote = {
-  fileName?: string;
-  title: string;
-  tags: string[];
-  created: number;
-  modified: number;
-  markdown: string;
-};
+import { CurrentNote, FileDescription } from "../note-management-types";
 
 export type NoteManagementContextState = {
   currentNote?: CurrentNote;

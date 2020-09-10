@@ -1,28 +1,48 @@
 import React, { useMemo, useContext } from "react";
 import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { Note } from "@material-ui/icons";
-import { FileDescription } from "../../hooks/use-file-reader";
-import NoteManagementContext from "../../contexts/note-management-context";
+import NoteManagementContext from "../note-management/contexts/note-management-context";
+import { FileDescription } from "../note-management/note-management-types";
 
-type Props = {
-  files: FileDescription[];
-  openFileName: string | undefined;
-};
-
-const NotesList = ({ files, openFileName }: Props): JSX.Element => {
-  const { openNote } = useContext(NoteManagementContext);
-  const numberOfFiles = useMemo<number>(() => files.length, [files.length]);
+const NotesList = (): JSX.Element => {
+  const { openNote, allAvailableNotes, currentNote, selectedTags } = useContext(
+    NoteManagementContext
+  );
+  const numberOfFiles = useMemo<number>(() => allAvailableNotes?.length ?? 0, [
+    allAvailableNotes?.length
+  ]);
+  const filteredFileList = useMemo<FileDescription[]>(() => {
+    return (allAvailableNotes ?? []).filter((fileDescription) => {
+      if (!selectedTags) {
+        return true;
+      }
+      return fileDescription.tags.some((tagString) => {
+        const tagsList = tagString.split("/");
+        let noMissmatchFound = true;
+        (selectedTags ?? []).forEach((selectedTag, index) => {
+          if (!noMissmatchFound) return;
+          if (selectedTag !== tagsList[index]) {
+            noMissmatchFound = false;
+          }
+        });
+        return noMissmatchFound;
+      });
+    });
+  }, [allAvailableNotes, selectedTags]);
   const memoizedFileList = useMemo<React.ReactNode>(
     () =>
       numberOfFiles ? (
-        files.map((file) => (
+        (filteredFileList ?? []).map((file) => (
           <ListItem
             button
-            selected={openFileName === file.fileName}
+            selected={
+              currentNote?.fileDescription.fileNameWithoutExtension ===
+              file.fileNameWithoutExtension
+            }
             onClick={() => {
               if (openNote) openNote(file);
             }}
-            key={file.fileName}
+            key={file.fileNameWithoutExtension}
           >
             <ListItemText primary={file.title} />
           </ListItem>
@@ -30,7 +50,12 @@ const NotesList = ({ files, openFileName }: Props): JSX.Element => {
       ) : (
         <ListItem disabled>No notes created</ListItem>
       ),
-    [files, numberOfFiles, openFileName, openNote]
+    [
+      filteredFileList,
+      currentNote?.fileDescription?.fileNameWithoutExtension,
+      numberOfFiles,
+      openNote
+    ]
   );
 
   return (

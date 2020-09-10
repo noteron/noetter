@@ -9,8 +9,8 @@ import {
   Theme
 } from "@material-ui/core";
 import { Label } from "@material-ui/icons";
-import { FileDescription } from "../../hooks/use-file-reader";
-import NoteManagementContext from "../../contexts/note-management-context";
+import NoteManagementContext from "../note-management/contexts/note-management-context";
+import { FileDescription } from "../note-management/note-management-types";
 
 type Props = {
   files: FileDescription[];

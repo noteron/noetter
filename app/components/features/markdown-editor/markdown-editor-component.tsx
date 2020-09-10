@@ -13,7 +13,8 @@ import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
-import NoteManagementContext from "../../contexts/note-management-context";
+import NoteManagementContext from "../note-management/contexts/note-management-context";
+import { DEFAULT_NOTE } from "../note-management/note-management-constants";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -95,19 +96,31 @@ const MarkdownEditorComponent = (): JSX.Element => {
       if (!updateCurrentNote) return;
       updateLastCursorPosition();
       updateCurrentNote({
-        created: currentNote?.created ?? Date.now(),
-        modified: Date.now(),
-        tags: currentNote?.tags ?? ["Untagged"],
-        title: currentNote?.title ?? "Untitled",
-        fileName: currentNote?.fileName,
-        markdown: newMarkdown
+        markdown: newMarkdown,
+        fileDescription: {
+          created:
+            currentNote?.fileDescription.created ??
+            DEFAULT_NOTE.fileDescription.created,
+          modified: Date.now(),
+          fileExists: currentNote?.fileDescription.fileExists ?? true,
+          fileNameWithoutExtension:
+            currentNote?.fileDescription.fileNameWithoutExtension ??
+            DEFAULT_NOTE.fileDescription.fileNameWithoutExtension,
+          tags:
+            currentNote?.fileDescription.tags ??
+            DEFAULT_NOTE.fileDescription.tags,
+          title:
+            currentNote?.fileDescription.title ??
+            DEFAULT_NOTE.fileDescription.title
+        }
       });
     },
     [
-      currentNote?.created,
-      currentNote?.fileName,
-      currentNote?.tags,
-      currentNote?.title,
+      currentNote?.fileDescription.created,
+      currentNote?.fileDescription.fileExists,
+      currentNote?.fileDescription.fileNameWithoutExtension,
+      currentNote?.fileDescription.tags,
+      currentNote?.fileDescription.title,
       updateCurrentNote,
       updateLastCursorPosition
     ]
