@@ -15,6 +15,8 @@ import useDirectoryInitialization from "./hooks/use-directory-initialization";
 import useNoteManagement, {
   NoteManagementContext
 } from "./features/note-management";
+import useEvents, { EventContext } from "./features/events";
+import { GlobalEventType } from "./features/events/event-types";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -55,12 +57,22 @@ export type Note = {
 
 const App = (): JSX.Element => {
   useDirectoryInitialization();
+  const events = useEvents();
   const noteManagement = useNoteManagement();
   const classes = useStyles();
   const [zenMode, setZenMode] = useState<boolean>(false);
 
   const toggleZenMode = useCallback(
-    () => setZenMode((prev: boolean) => !prev),
+    () =>
+      setZenMode((prev: boolean) => {
+        if (events.triggerEvent)
+          events.triggerEvent(
+            prev
+              ? GlobalEventType.ZenModeDisabled
+              : GlobalEventType.ZenModeEnabled
+          );
+        return !prev;
+      }),
     []
   );
 
@@ -97,31 +109,33 @@ const App = (): JSX.Element => {
 
   return (
     <>
-      <NoteManagementContext.Provider value={noteManagement}>
-        <ThemeProvider theme={darkTheme}>
-          <CssBaseline />
-          <Grid
-            container
-            justify="center"
-            direction="row"
-            className={classes.root}
-          >
-            {!zenMode && (
-              <Grid item xs={2} className={classes.item}>
-                <TagsTree />
+      <EventContext.Provider value={events}>
+        <NoteManagementContext.Provider value={noteManagement}>
+          <ThemeProvider theme={darkTheme}>
+            <CssBaseline />
+            <Grid
+              container
+              justify="center"
+              direction="row"
+              className={classes.root}
+            >
+              {!zenMode && (
+                <Grid item xs={2} className={classes.item}>
+                  <TagsTree />
+                </Grid>
+              )}
+              {!zenMode && (
+                <Grid item xs={3} className={classes.item}>
+                  <NotesList />
+                </Grid>
+              )}
+              <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
+                <MarkdownEditor />
               </Grid>
-            )}
-            {!zenMode && (
-              <Grid item xs={3} className={classes.item}>
-                <NotesList />
-              </Grid>
-            )}
-            <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
-              <MarkdownEditor />
             </Grid>
-          </Grid>
-        </ThemeProvider>
-      </NoteManagementContext.Provider>
+          </ThemeProvider>
+        </NoteManagementContext.Provider>
+      </EventContext.Provider>
     </>
   );
 };
