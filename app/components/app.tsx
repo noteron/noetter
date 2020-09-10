@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -14,7 +14,6 @@ import TagsTree from "./features/tags-tree";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
 import useNoteManagement from "./features/note-management/hooks/use-note-management";
 import NoteManagementContext from "./features/note-management/contexts/note-management-context";
-import { FileDescription } from "./features/note-management/note-management-types";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -108,10 +107,7 @@ const App = (): JSX.Element => {
           >
             {!zenMode && (
               <Grid item xs={2} className={classes.item}>
-                <TagsTree
-                  files={noteManagement.allAvailableNotes ?? []}
-                  selectedTags={noteManagement.selectedTags}
-                />
+                <TagsTree />
               </Grid>
             )}
             {!zenMode && (

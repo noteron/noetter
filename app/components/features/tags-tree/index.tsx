@@ -10,12 +10,6 @@ import {
 } from "@material-ui/core";
 import { Label } from "@material-ui/icons";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
-import { FileDescription } from "../note-management/note-management-types";
-
-type Props = {
-  files: FileDescription[];
-  selectedTags: string[] | undefined;
-};
 
 export type TagNode = {
   name: string;
@@ -42,9 +36,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const TagsTree = ({ files, selectedTags }: Props): JSX.Element => {
+const TagsTree = (): JSX.Element => {
   const classes = useStyles();
-  const { selectTags } = useContext(NoteManagementContext);
+  const { selectTags, allAvailableNotes, selectedTags } = useContext(
+    NoteManagementContext
+  );
 
   const updateNodeListWithMatchingTags = useCallback(
     (nodeList: TagNode[], tagsList: string[]): void => {
@@ -77,15 +73,18 @@ const TagsTree = ({ files, selectedTags }: Props): JSX.Element => {
   );
 
   const tags = useMemo<TagNode[]>(() => {
-    return files.reduce<TagNode[]>((rootNodes, current): TagNode[] => {
-      current.tags.forEach((tagString): void => {
-        const tagStringList = tagString.split("/");
-        if (!tagStringList.length) return;
-        updateNodeListWithMatchingTags(rootNodes, tagStringList);
-      });
-      return rootNodes;
-    }, []);
-  }, [files, updateNodeListWithMatchingTags]);
+    return (allAvailableNotes ?? []).reduce<TagNode[]>(
+      (rootNodes, current): TagNode[] => {
+        current.tags.forEach((tagString): void => {
+          const tagStringList = tagString.split("/");
+          if (!tagStringList.length) return;
+          updateNodeListWithMatchingTags(rootNodes, tagStringList);
+        });
+        return rootNodes;
+      },
+      []
+    );
+  }, [allAvailableNotes, updateNodeListWithMatchingTags]);
 
   const isSelectedAndLastInTagsList = useCallback(
     (
