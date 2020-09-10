@@ -1,26 +1,20 @@
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useContext
-} from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
   CssBaseline,
   Grid,
   makeStyles,
-  createStyles,
-  Drawer
+  createStyles
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
 import useShortcut from "./hooks/use-shortcut";
 import useFileReader, { FileDescription } from "./hooks/use-file-reader";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
-import FilePathContext from "./contexts/file-path-context";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
+import SettingsDrawer from "./features/settings-drawer";
+import useSettings from "./hooks/use-settings";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -61,13 +55,13 @@ export type Note = {
 
 const App = (): JSX.Element => {
   useDirectoryInitialization();
+  const settings = useSettings();
   const classes = useStyles();
   const { readFileAsync, getFileDescriptions } = useFileReader();
   const [zenMode, setZenMode] = useState<boolean>(false);
   const [fileList, setFileList] = useState<FileDescription[]>([]);
   const [currentNote, setCurrentNote] = useState<Note>({ content: "#" });
   const [selectedTags, setSelectedTags] = useState<string[]>();
-  const [settingsDrawer, setSettingsDrawer] = useState<boolean>(false);
 
   const filteredFileList = useMemo<FileDescription[]>(() => {
     return fileList.filter((fileDescription) => {
@@ -124,12 +118,6 @@ const App = (): JSX.Element => {
     toggleZenMode
   );
 
-  const handleOnSettingsClick = useCallback(() => {
-    setSettingsDrawer(true);
-  }, []);
-
-  const handleOnCloseSettings = useCallback(() => setSettingsDrawer(false), []);
-
   return (
     <>
       <ThemeProvider theme={darkTheme}>
@@ -146,7 +134,7 @@ const App = (): JSX.Element => {
                 files={fileList}
                 selectedTags={selectedTags}
                 onItemClick={setSelectedTags}
-                onSettingsClick={handleOnSettingsClick}
+                onSettingsClick={settings.onOpen}
               />
             </Grid>
           )}
@@ -168,13 +156,7 @@ const App = (): JSX.Element => {
             />
           </Grid>
         </Grid>
-        <Drawer
-          anchor="right"
-          open={settingsDrawer}
-          onClose={handleOnCloseSettings}
-        >
-          Settings! Select root folder
-        </Drawer>
+        <SettingsDrawer settings={settings} />
       </ThemeProvider>
     </>
   );
