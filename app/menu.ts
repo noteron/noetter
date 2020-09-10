@@ -38,6 +38,13 @@ export default class MenuBuilder {
   }
 
   setupDevelopmentEnvironment(): void {
+    if (process.env.HIDE_DEV_TOOLS) {
+      this.mainWindow.webContents.once("devtools-opened", () => {
+        this.mainWindow.webContents.closeDevTools();
+      });
+    } else {
+      this.mainWindow.webContents.openDevTools();
+    }
     this.mainWindow.webContents.on("context-menu", (_, props) => {
       const { x, y } = props;
 
