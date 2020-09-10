@@ -11,8 +11,10 @@ export const extractMarkdownFromRawFile = (fileContents: string): string => {
       metaStartEndIndicator,
       positionOfIndicatorForMetaStart + metaStartEndIndicator.length
     ) + metaStartEndIndicator.length;
-
-  const markdown = fileContents.slice(positionOfIndicatorForMetaEnd);
+  const numberOfLineBreaksBetweenMetaAndMarkdown = 1;
+  const markdown = fileContents.slice(
+    positionOfIndicatorForMetaEnd + numberOfLineBreaksBetweenMetaAndMarkdown
+  );
   return markdown;
 };
 
