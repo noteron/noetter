@@ -1,15 +1,15 @@
 import { useState, useCallback, useEffect } from "react";
-import useFileReader from "./use-file-reader";
+import useFileReader from "./hooks/use-file-reader";
 import {
   extractMarkdownFromRawFile,
   extractSelectedTags,
   updateCurrentNoteMetadata,
   transformCurrentNoteIntoRawFileString
-} from "../helpers/note-management-helpers";
-import { NoteManagementContextState } from "../contexts/note-management-context";
-import { CurrentNote, FileDescription } from "../note-management-types";
-import useFileWriter from "./use-file-writer";
-import { DEFAULT_NOTE } from "../note-management-constants";
+} from "./helpers/note-management-helpers";
+import { NoteManagementContextState } from "./contexts/note-management-context";
+import { CurrentNote, FileDescription } from "./note-management-types";
+import useFileWriter from "./hooks/use-file-writer";
+import { DEFAULT_NOTE } from "./note-management-constants";
 
 const useNoteManagement = (): NoteManagementContextState => {
   const { getFileDescriptions, readFileAsync } = useFileReader();

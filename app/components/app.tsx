@@ -12,8 +12,9 @@ import useShortcut from "./hooks/use-shortcut";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
-import useNoteManagement from "./features/note-management/hooks/use-note-management";
-import NoteManagementContext from "./features/note-management/contexts/note-management-context";
+import useNoteManagement, {
+  NoteManagementContext
+} from "./features/note-management";
 
 const darkTheme = createMuiTheme({
   palette: {
