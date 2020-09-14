@@ -17,6 +17,7 @@ import useNoteManagement, {
 } from "./features/note-management";
 import useEvents, { EventContext } from "./features/events";
 import { GlobalEventType } from "./features/events/event-types";
+import useZenMode from "./hooks/use-zen-mode";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -60,21 +61,16 @@ const App = (): JSX.Element => {
   const events = useEvents();
   const noteManagement = useNoteManagement();
   const classes = useStyles();
-  const [zenMode, setZenMode] = useState<boolean>(false);
+  const zenMode = useZenMode(events);
 
-  const toggleZenMode = useCallback(
-    () =>
-      setZenMode((prev: boolean) => {
-        if (events.triggerEvent)
-          events.triggerEvent(
-            prev
-              ? GlobalEventType.ZenModeDisabled
-              : GlobalEventType.ZenModeEnabled
-          );
-        return !prev;
-      }),
-    []
-  );
+  const handleZenModeKeypress = useCallback(() => {
+    if (events.triggerEvent) {
+      events
+        .triggerEvent(GlobalEventType.ZenModeShortcutTrigger)
+        .then(() => undefined)
+        .catch(() => {});
+    }
+  }, [events]);
 
   const handleOnSave = useCallback(() => {
     if (!noteManagement.saveNote) return;
@@ -87,7 +83,7 @@ const App = (): JSX.Element => {
       ctrlKey: true,
       key: "z"
     },
-    toggleZenMode
+    handleZenModeKeypress
   );
 
   useShortcut(

@@ -1,19 +1,18 @@
 export enum GlobalEventType {
-  ZenModeEnabled,
-  ZenModeDisabled
+  ZenModeShortcutTrigger = "ZenModeShortcutTrigger"
 }
 
 export type GlobalEventListener = {
   eventType: GlobalEventType;
   callback: () => void;
-  reference: number;
+  reference: string;
 };
 
 export type EventContextState = {
   registerEventListener?: (
     eventType: GlobalEventType,
     callback: () => void
-  ) => number;
-  unregisterEventListener?: (reference: number) => void;
+  ) => string;
+  unregisterEventListener?: (reference: string) => void;
   triggerEvent?: (eventType: GlobalEventType) => Promise<void>;
 };

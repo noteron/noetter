@@ -11,9 +11,8 @@ const useEvents = (): EventContextState => {
   );
 
   const registerEventListener = useCallback(
-    (eventType: GlobalEventType, callback: () => void): number => {
-      const reference: number =
-        Math.round(Math.random() * 1000000) + Date.now();
+    (eventType: GlobalEventType, callback: () => void): string => {
+      const reference = `${Math.round(Math.random() * 1000000)}${Date.now()}`;
       setEventListeners(
         (prev: GlobalEventListener[]): GlobalEventListener[] => [
           ...prev,
@@ -25,13 +24,11 @@ const useEvents = (): EventContextState => {
     []
   );
 
-  const unregisterEventListener = useCallback(
-    (reference: number) =>
-      setEventListeners((prev: GlobalEventListener[]): GlobalEventListener[] =>
-        prev.filter((e) => e.reference !== reference)
-      ),
-    []
-  );
+  const unregisterEventListener = useCallback((reference: string) => {
+    setEventListeners((prev: GlobalEventListener[]): GlobalEventListener[] =>
+      prev.filter((e) => e.reference !== reference)
+    );
+  }, []);
 
   const triggerEvent = useCallback(
     async (eventType: GlobalEventType): Promise<void> =>

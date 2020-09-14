@@ -15,8 +15,6 @@ import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
-import { EventContext } from "../events";
-import { GlobalEventType } from "../events/event-types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,9 +38,6 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const theme = useTheme();
   const classes = useStyles(theme);
   const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
-  const { registerEventListener, unregisterEventListener } = useContext(
-    EventContext
-  );
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
@@ -59,19 +54,6 @@ const MarkdownEditorComponent = (): JSX.Element => {
     currentNote?.markdown
   ]);
   const renderedMarkdown = useMarkdown(currentNote?.markdown ?? "");
-
-  useEffect(() => {
-    if (registerEventListener && unregisterEventListener) {
-      const reference = registerEventListener(
-        GlobalEventType.ZenModeEnabled,
-        () => {
-          console.log("Event zenmode enabled was triggered and listened to.");
-        }
-      );
-      return unregisterEventListener(reference);
-    }
-    return () => {};
-  }, [registerEventListener, unregisterEventListener]);
 
   useEffect(() => {
     const ref = textArea.current;
