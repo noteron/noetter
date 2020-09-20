@@ -36,7 +36,6 @@ const useKeyboardShortcuts = ({ queueEvent }: EventContextState) => {
       const callback = (event: KeyboardEvent) => handleKeydown(s, event);
       document.addEventListener(keyDownEvent, callback);
       callbacks.push(callback);
-      console.log("SHORTCUT REGISTRATED: ", s.name);
     });
     return () => {
       callbacks.forEach((c) => document.removeEventListener(keyDownEvent, c));
