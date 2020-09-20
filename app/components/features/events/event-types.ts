@@ -14,5 +14,5 @@ export type EventContextState = {
     callback: () => void
   ) => string;
   unregisterEventListener?: (reference: string) => void;
-  triggerEvent?: (eventType: GlobalEventType) => Promise<void>;
+  queueEvent?: (eventType: GlobalEventType) => void;
 };

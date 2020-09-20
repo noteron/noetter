@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -64,12 +64,8 @@ const App = (): JSX.Element => {
   const zenMode = useZenMode(events);
 
   const handleZenModeKeypress = useCallback(() => {
-    if (events.triggerEvent) {
-      events
-        .triggerEvent(GlobalEventType.ZenModeShortcutTrigger)
-        .then(() => undefined)
-        .catch(() => {});
-    }
+    if (events.queueEvent)
+      events.queueEvent(GlobalEventType.ZenModeShortcutTrigger);
   }, [events]);
 
   const handleOnSave = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   GlobalEventListener,
   GlobalEventType,
@@ -9,6 +9,23 @@ const useEvents = (): EventContextState => {
   const [eventListeners, setEventListeners] = useState<GlobalEventListener[]>(
     []
   );
+  const [eventQueue, setEventQueue] = useState<GlobalEventType[]>([]);
+
+  const handleNextEvent = useCallback(() => {
+    setEventQueue((prev: GlobalEventType[]): GlobalEventType[] => {
+      const [current, ...other] = prev;
+      const handlers = eventListeners.filter((el) => el.eventType === current);
+      handlers.forEach((h) => {
+        if (h.callback) h.callback();
+      });
+      return other;
+    });
+  }, [eventListeners]);
+
+  useEffect(() => {
+    if (!eventQueue.length) return;
+    handleNextEvent();
+  }, [eventQueue.length, handleNextEvent]);
 
   const registerEventListener = useCallback(
     (eventType: GlobalEventType, callback: () => void): string => {
@@ -30,23 +47,18 @@ const useEvents = (): EventContextState => {
     );
   }, []);
 
-  const triggerEvent = useCallback(
-    async (eventType: GlobalEventType): Promise<void> =>
-      new Promise<void>((resolve) => {
-        const listenersToCall = eventListeners.filter(
-          (e) => e.eventType === eventType
-        );
-        listenersToCall.forEach((listener) => {
-          if (listener.callback) listener.callback();
-        });
-        resolve();
-      }),
-    [eventListeners]
+  const queueEvent = useCallback(
+    (eventType: GlobalEventType): void =>
+      setEventQueue((prev: GlobalEventType[]): GlobalEventType[] => [
+        ...prev,
+        eventType
+      ]),
+    []
   );
 
   return {
     registerEventListener,
-    triggerEvent,
+    queueEvent,
     unregisterEventListener
   };
 };
