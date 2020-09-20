@@ -9,12 +9,13 @@ import React, {
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
-import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
+import useEventListener from "../events/hooks/use-event-listener";
+import { GlobalEventType } from "../events/event-types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -146,30 +147,16 @@ const MarkdownEditorComponent = (): JSX.Element => {
     [rawMarkdown, writeDebugInfoToConsole]
   );
 
-  useShortcut(
-    {
-      altKey: false,
-      ctrlKey: true,
-      key: "e"
-    },
+  useEventListener(
+    GlobalEventType.EditorToggleEditModeTrigger,
     handleOnToggleEditModeShortcut
   );
-
-  useShortcut(
-    {
-      altKey: true,
-      ctrlKey: false,
-      key: "d"
-    },
+  useEventListener(
+    GlobalEventType.EditorMakeRowIntoCheckboxTrigger,
     handleOnInsertCheckboxShortcut
   );
-
-  useShortcut(
-    {
-      altKey: true,
-      ctrlKey: false,
-      key: "s"
-    },
+  useEventListener(
+    GlobalEventType.EditorDebugConsoleTrigger,
     handleOnDebugShortcut
   );
 

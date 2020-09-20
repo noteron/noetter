@@ -1,6 +1,8 @@
-# Notes
+# Readme
 
-Project was set up using https://www.electronjs.org/docs/tutorial/first-app.
+In this project we are building a markdown note taking app using electron and react.
+
+The idea is to make a note taking app that avoids locking the user to a certain tool by saving notes in plain text files instead of propriatary formats. This also allows the user to use tools like git to version control their notes in a easy way.
 
 ## Getting started
 
@@ -19,3 +21,7 @@ Project was set up using https://www.electronjs.org/docs/tutorial/first-app.
 
 - Toggle edit and view mode: CTRL + E
 - Toggle zen mode: CTRL + ALT + Z
+- Create new note: CTRL + N
+- Debug editor in console: ALT + S
+- Transform current row into checkbox: ALT + D
+- Save note: CTRL + S

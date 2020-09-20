@@ -10,8 +10,12 @@ import { NoteManagementContextState } from "./contexts/note-management-context";
 import { CurrentNote, FileDescription } from "./note-management-types";
 import useFileWriter from "./hooks/use-file-writer";
 import { DEFAULT_NOTE } from "./note-management-constants";
+import useOutsideContextEventListener from "../events/hooks/use-outside-context-event-listener";
+import { EventContextState, GlobalEventType } from "../events/event-types";
 
-const useNoteManagement = (): NoteManagementContextState => {
+const useNoteManagement = (
+  events: EventContextState
+): NoteManagementContextState => {
   const { getFileDescriptions, readFileAsync } = useFileReader();
   const { saveExistingFile, saveNewFile } = useFileWriter();
   const [currentNote, setCurrentNote] = useState<CurrentNote>(DEFAULT_NOTE);
@@ -129,6 +133,18 @@ const useNoteManagement = (): NoteManagementContextState => {
   const updateCurrentNote = useCallback(
     (updatedNote: CurrentNote) => setCurrentNote(updatedNote),
     []
+  );
+
+  const saveNoteEventTriggerHandler = useCallback(() => {
+    saveNote()
+      .then(() => undefined)
+      .catch(() => {});
+  }, [saveNote]);
+
+  useOutsideContextEventListener(
+    GlobalEventType.SaveCurrentNoteTrigger,
+    saveNoteEventTriggerHandler,
+    events
   );
 
   return {
