@@ -17,11 +17,11 @@ const useZenMode = ({
 
   useEffect(() => {
     if (registerEventListener && unregisterEventListener) {
-      const reference = registerEventListener(
+      registerEventListener(
         GlobalEventType.ZenModeShortcutTrigger,
         toggleZenMode
       );
-      return () => unregisterEventListener(reference);
+      return () => unregisterEventListener(toggleZenMode);
     }
     return undefined;
   }, [registerEventListener, toggleZenMode, unregisterEventListener]);

@@ -28,22 +28,20 @@ const useEvents = (): EventContextState => {
   }, [eventQueue.length, handleNextEvent]);
 
   const registerEventListener = useCallback(
-    (eventType: GlobalEventType, callback: () => void): string => {
-      const reference = `${Math.round(Math.random() * 1000000)}${Date.now()}`;
+    (eventType: GlobalEventType, callback: () => void): void => {
       setEventListeners(
         (prev: GlobalEventListener[]): GlobalEventListener[] => [
           ...prev,
-          { eventType, callback, reference }
+          { eventType, callback }
         ]
       );
-      return reference;
     },
     []
   );
 
-  const unregisterEventListener = useCallback((reference: string) => {
+  const unregisterEventListener = useCallback((reference: () => void) => {
     setEventListeners((prev: GlobalEventListener[]): GlobalEventListener[] =>
-      prev.filter((e) => e.reference !== reference)
+      prev.filter((e) => e.callback !== reference)
     );
   }, []);
 
