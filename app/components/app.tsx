@@ -15,8 +15,7 @@ import useDirectoryInitialization from "./hooks/use-directory-initialization";
 import useNoteManagement, {
   NoteManagementContext
 } from "./features/note-management";
-import useEvents, { EventContext } from "./features/events";
-import { GlobalEventType } from "./features/events/event-types";
+import useEvents, { EventContext, GlobalEventType } from "./features/events";
 import useZenMode from "./hooks/use-zen-mode";
 
 const darkTheme = createMuiTheme({
