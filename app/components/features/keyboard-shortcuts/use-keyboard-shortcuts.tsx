@@ -7,15 +7,21 @@ const keyDownEvent = "keydown";
 
 const useKeyboardShortcuts = ({ queueEvent }: EventContextState) => {
   const [shortcuts] = useState<Shortcut[]>(shortcutMap);
+  const [queue, setQueue] = useState<GlobalEventType[]>([]);
 
-  const handleShortcutTriggered = useCallback(
-    (eventType: GlobalEventType) => {
-      if (queueEvent) {
-        queueEvent(eventType);
-      }
-    },
-    [queueEvent]
-  );
+  const handleNextInQueue = useCallback(() => {
+    setQueue((prev: GlobalEventType[]): GlobalEventType[] => {
+      const [current, ...other] = prev;
+      if (!queueEvent || !current) return prev;
+      queueEvent(current);
+      return other;
+    });
+  }, [queueEvent]);
+
+  useEffect(() => {
+    if (!queue) return;
+    handleNextInQueue();
+  }, [handleNextInQueue, queue]);
 
   const handleKeydown = useCallback(
     (shortcutDefinition: Shortcut, event: KeyboardEvent): void => {
@@ -24,9 +30,12 @@ const useKeyboardShortcuts = ({ queueEvent }: EventContextState) => {
         shortcutDefinition.keyCombination.altKey === event.altKey &&
         event.key === shortcutDefinition.keyCombination.key
       )
-        handleShortcutTriggered(shortcutDefinition.eventType);
+        setQueue((prev: GlobalEventType[]): GlobalEventType[] => [
+          ...prev,
+          shortcutDefinition.eventType
+        ]);
     },
-    [handleShortcutTriggered]
+    []
   );
 
   useEffect((): (() => void) => {
@@ -40,7 +49,7 @@ const useKeyboardShortcuts = ({ queueEvent }: EventContextState) => {
     return () => {
       callbacks.forEach((c) => document.removeEventListener(keyDownEvent, c));
     };
-  }, [handleKeydown, handleShortcutTriggered, shortcuts]);
+  }, [handleKeydown, shortcuts]);
 };
 
 export default useKeyboardShortcuts;

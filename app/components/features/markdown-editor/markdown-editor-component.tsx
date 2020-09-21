@@ -127,11 +127,6 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
-  const handleOnToggleEditModeShortcut = useCallback(() => {
-    setEditMode((prev: boolean) => !prev);
-    setNeedToSetFocus(true);
-  }, []);
-
   const handleOnInsertCheckboxShortcut = useCallback(() => {
     insertOrReplaceAtPosition(
       " - [ ] ",
@@ -147,14 +142,25 @@ const MarkdownEditorComponent = (): JSX.Element => {
     [rawMarkdown, writeDebugInfoToConsole]
   );
 
+  const handleToggleEditMode = useCallback(() => {
+    setEditMode((prev: boolean): boolean => !prev);
+    setNeedToSetFocus(true);
+  }, []);
+
   useEventListener(
     GlobalEventType.EditorToggleEditModeTrigger,
-    handleOnToggleEditModeShortcut
+    handleToggleEditMode
+  );
+
+  const handleMakeRowIntoCheckbox = useCallback(
+    () => handleOnInsertCheckboxShortcut(),
+    [handleOnInsertCheckboxShortcut]
   );
   useEventListener(
     GlobalEventType.EditorMakeRowIntoCheckboxTrigger,
-    handleOnInsertCheckboxShortcut
+    handleMakeRowIntoCheckbox
   );
+
   useEventListener(
     GlobalEventType.EditorDebugConsoleTrigger,
     handleOnDebugShortcut

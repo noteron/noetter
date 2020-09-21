@@ -147,6 +147,18 @@ const useNoteManagement = (
     events
   );
 
+  const createNewNoteEventTriggerHandler = useCallback(() => {
+    createNewNote()
+      .then(() => undefined)
+      .catch(() => {});
+  }, [createNewNote]);
+
+  useOutsideContextEventListener(
+    GlobalEventType.CreateNewNoteTrigger,
+    createNewNoteEventTriggerHandler,
+    events
+  );
+
   return {
     saveNote,
     allAvailableNotes: fileList,
