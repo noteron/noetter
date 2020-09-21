@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import {
   ThemeProvider,
   createMuiTheme,
@@ -8,7 +8,6 @@ import {
   Grid
 } from "@material-ui/core";
 import MarkdownEditor from "./features/markdown-editor";
-import useShortcut from "./hooks/use-shortcut";
 import NotesList from "./features/notes-list";
 import TagsTree from "./features/tags-tree";
 import useDirectoryInitialization from "./hooks/use-directory-initialization";
@@ -17,7 +16,7 @@ import useNoteManagement, {
 } from "./features/note-management";
 import useEvents, { EventContext } from "./features/events";
 import useZenMode from "./hooks/use-zen-mode";
-import { GlobalEventType } from "./features/events/event-types";
+import useKeyboardShortcuts from "./features/keyboard-shortcuts";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -59,45 +58,10 @@ export type Note = {
 const App = (): JSX.Element => {
   useDirectoryInitialization();
   const events = useEvents();
-  const noteManagement = useNoteManagement();
+  const noteManagement = useNoteManagement(events);
   const classes = useStyles();
   const zenMode = useZenMode(events);
-
-  const handleZenModeKeypress = useCallback(() => {
-    if (events.queueEvent)
-      events.queueEvent(GlobalEventType.ZenModeShortcutTrigger);
-  }, [events]);
-
-  const handleOnSave = useCallback(() => {
-    if (!noteManagement.saveNote) return;
-    noteManagement.saveNote();
-  }, [noteManagement]);
-
-  useShortcut(
-    {
-      altKey: true,
-      ctrlKey: true,
-      key: "z"
-    },
-    handleZenModeKeypress
-  );
-
-  useShortcut(
-    {
-      altKey: false,
-      ctrlKey: true,
-      key: "n"
-    },
-    noteManagement.createNewNote
-  );
-  useShortcut(
-    {
-      altKey: false,
-      ctrlKey: true,
-      key: "s"
-    },
-    handleOnSave
-  );
+  useKeyboardShortcuts(events);
 
   return (
     <>

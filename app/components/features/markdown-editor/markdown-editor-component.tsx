@@ -9,12 +9,13 @@ import React, {
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
-import useShortcut from "../../hooks/use-shortcut";
 import useEditorTools from "./hooks/use-editor-tools";
 import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
+import { GlobalEventType } from "../events/event-types";
+import { useEventListener } from "../events";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -41,6 +42,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
+  const [needToHandleInsertCheckbox, setNeedToHandleInsertCheckbox] = useState<
+    boolean
+  >(false);
   const [lastCursorPosition, setLastCursorPosition] = useState<
     CursorPosition
   >();
@@ -126,11 +130,6 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
-  const handleOnToggleEditModeShortcut = useCallback(() => {
-    setEditMode((prev: boolean) => !prev);
-    setNeedToSetFocus(true);
-  }, []);
-
   const handleOnInsertCheckboxShortcut = useCallback(() => {
     insertOrReplaceAtPosition(
       " - [ ] ",
@@ -146,30 +145,33 @@ const MarkdownEditorComponent = (): JSX.Element => {
     [rawMarkdown, writeDebugInfoToConsole]
   );
 
-  useShortcut(
-    {
-      altKey: false,
-      ctrlKey: true,
-      key: "e"
-    },
-    handleOnToggleEditModeShortcut
+  const handleToggleEditMode = useCallback(() => {
+    setEditMode((prev: boolean): boolean => !prev);
+    setNeedToSetFocus(true);
+  }, []);
+
+  useEventListener(
+    GlobalEventType.EditorToggleEditModeTrigger,
+    handleToggleEditMode
   );
 
-  useShortcut(
-    {
-      altKey: true,
-      ctrlKey: false,
-      key: "d"
-    },
-    handleOnInsertCheckboxShortcut
+  useEffect(() => {
+    if (!needToHandleInsertCheckbox) return;
+    handleOnInsertCheckboxShortcut();
+    setNeedToHandleInsertCheckbox(false);
+  }, [handleOnInsertCheckboxShortcut, needToHandleInsertCheckbox]);
+
+  const handleMakeRowIntoCheckbox = useCallback(
+    () => setNeedToHandleInsertCheckbox(true),
+    []
+  );
+  useEventListener(
+    GlobalEventType.EditorMakeRowIntoCheckboxTrigger,
+    handleMakeRowIntoCheckbox
   );
 
-  useShortcut(
-    {
-      altKey: true,
-      ctrlKey: false,
-      key: "s"
-    },
+  useEventListener(
+    GlobalEventType.EditorDebugConsoleTrigger,
     handleOnDebugShortcut
   );
 
