@@ -142,7 +142,7 @@ const useNoteManagement = (
   }, [saveNote]);
 
   useOutsideContextEventListener(
-    GlobalEventType.SaveCurrentNoteTrigger,
+    GlobalEventType.NoteManagementSaveCurrentNoteTrigger,
     saveNoteEventTriggerHandler,
     events
   );
@@ -154,7 +154,7 @@ const useNoteManagement = (
   }, [createNewNote]);
 
   useOutsideContextEventListener(
-    GlobalEventType.CreateNewNoteTrigger,
+    GlobalEventType.NoteManagementCreateNewNoteTrigger,
     createNewNoteEventTriggerHandler,
     events
   );

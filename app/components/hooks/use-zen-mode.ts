@@ -14,7 +14,7 @@ const useZenMode = (events: EventContextState): boolean => {
   );
 
   useOutsideContextEventListener(
-    GlobalEventType.ZenModeShortcutTrigger,
+    GlobalEventType.WindowZenModeShortcutTrigger,
     toggleZenMode,
     events
   );

@@ -9,7 +9,7 @@ const shortcutMap: Shortcut[] = [
       ctrlKey: true,
       key: "z"
     },
-    eventType: GlobalEventType.ZenModeShortcutTrigger
+    eventType: GlobalEventType.WindowZenModeShortcutTrigger
   },
   {
     name: "Note management: Create new note",
@@ -18,7 +18,7 @@ const shortcutMap: Shortcut[] = [
       ctrlKey: true,
       key: "n"
     },
-    eventType: GlobalEventType.CreateNewNoteTrigger
+    eventType: GlobalEventType.NoteManagementCreateNewNoteTrigger
   },
   {
     name: "Note Management: Save current note",
@@ -27,7 +27,7 @@ const shortcutMap: Shortcut[] = [
       ctrlKey: true,
       key: "s"
     },
-    eventType: GlobalEventType.SaveCurrentNoteTrigger
+    eventType: GlobalEventType.NoteManagementSaveCurrentNoteTrigger
   },
   {
     name: "Editor: Toggle edit mode",

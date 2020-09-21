@@ -1,7 +1,7 @@
 export enum GlobalEventType {
-  ZenModeShortcutTrigger = "ZenModeShortcutTrigger",
-  CreateNewNoteTrigger = "CreateNewNoteTrigger",
-  SaveCurrentNoteTrigger = "SaveCurrentNoteTrigger",
+  WindowZenModeShortcutTrigger = "WindowZenModeShortcutTrigger",
+  NoteManagementCreateNewNoteTrigger = "NoteManagementCreateNewNoteTrigger",
+  NoteManagementSaveCurrentNoteTrigger = "NoteManagementSaveCurrentNoteTrigger",
   EditorToggleEditModeTrigger = "EditorToggleEditModeTrigger",
   EditorMakeRowIntoCheckboxTrigger = "EditorMakeRowIntoCheckboxTrigger",
   EditorDebugConsoleTrigger = "EditorDebugConsoleTrigger"
