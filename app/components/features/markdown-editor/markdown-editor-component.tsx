@@ -14,8 +14,8 @@ import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
-import useEventListener from "../events/hooks/use-event-listener";
 import { GlobalEventType } from "../events/event-types";
+import { useEventListener } from "../events";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -42,6 +42,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const textArea = useRef<HTMLTextAreaElement>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
+  const [needToHandleInsertCheckbox, setNeedToHandleInsertCheckbox] = useState<
+    boolean
+  >(false);
   const [lastCursorPosition, setLastCursorPosition] = useState<
     CursorPosition
   >();
@@ -152,9 +155,15 @@ const MarkdownEditorComponent = (): JSX.Element => {
     handleToggleEditMode
   );
 
+  useEffect(() => {
+    if (!needToHandleInsertCheckbox) return;
+    handleOnInsertCheckboxShortcut();
+    setNeedToHandleInsertCheckbox(false);
+  }, [handleOnInsertCheckboxShortcut, needToHandleInsertCheckbox]);
+
   const handleMakeRowIntoCheckbox = useCallback(
-    () => handleOnInsertCheckboxShortcut(),
-    [handleOnInsertCheckboxShortcut]
+    () => setNeedToHandleInsertCheckbox(true),
+    []
   );
   useEventListener(
     GlobalEventType.EditorMakeRowIntoCheckboxTrigger,

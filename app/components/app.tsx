@@ -16,7 +16,7 @@ import useNoteManagement, {
 } from "./features/note-management";
 import useEvents, { EventContext } from "./features/events";
 import useZenMode from "./hooks/use-zen-mode";
-import useKeyboardShortcuts from "./features/keyboard-shortcuts/use-keyboard-shortcuts";
+import useKeyboardShortcuts from "./features/keyboard-shortcuts";
 
 const darkTheme = createMuiTheme({
   palette: {

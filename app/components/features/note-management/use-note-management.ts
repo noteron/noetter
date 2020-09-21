@@ -10,8 +10,8 @@ import { NoteManagementContextState } from "./contexts/note-management-context";
 import { CurrentNote, FileDescription } from "./note-management-types";
 import useFileWriter from "./hooks/use-file-writer";
 import { DEFAULT_NOTE } from "./note-management-constants";
-import useOutsideContextEventListener from "../events/hooks/use-outside-context-event-listener";
 import { EventContextState, GlobalEventType } from "../events/event-types";
+import { useOutsideContextEventListener } from "../events";
 
 const useNoteManagement = (
   events: EventContextState
