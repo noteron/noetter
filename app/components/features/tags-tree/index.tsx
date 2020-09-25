@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useContext } from "react";
 import {
   List,
   ListItem,
@@ -9,12 +9,9 @@ import {
   Theme
 } from "@material-ui/core";
 import { Label, Settings } from "@material-ui/icons";
-import { FileDescription } from "../../hooks/use-file-reader";
+import NoteManagementContext from "../note-management/contexts/note-management-context";
 
 type Props = {
-  files: FileDescription[];
-  selectedTags: string[] | undefined;
-  onItemClick: (tagList: string[]) => void;
   onSettingsClick: () => void;
 };
 
@@ -45,13 +42,11 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const TagsTree = ({
-  files,
-  selectedTags,
-  onItemClick,
-  onSettingsClick
-}: Props): JSX.Element => {
+const TagsTree = ({ onSettingsClick }: Props): JSX.Element => {
   const classes = useStyles();
+  const { selectTags, allAvailableNotes, selectedTags } = useContext(
+    NoteManagementContext
+  );
 
   const updateNodeListWithMatchingTags = useCallback(
     (nodeList: TagNode[], tagsList: string[]): void => {
@@ -84,15 +79,18 @@ const TagsTree = ({
   );
 
   const tags = useMemo<TagNode[]>(() => {
-    return files.reduce<TagNode[]>((rootNodes, current): TagNode[] => {
-      current.tags.forEach((tagString): void => {
-        const tagStringList = tagString.split("/");
-        if (!tagStringList.length) return;
-        updateNodeListWithMatchingTags(rootNodes, tagStringList);
-      });
-      return rootNodes;
-    }, []);
-  }, [files, updateNodeListWithMatchingTags]);
+    return (allAvailableNotes ?? []).reduce<TagNode[]>(
+      (rootNodes, current): TagNode[] => {
+        current.tags.forEach((tagString): void => {
+          const tagStringList = tagString.split("/");
+          if (!tagStringList.length) return;
+          updateNodeListWithMatchingTags(rootNodes, tagStringList);
+        });
+        return rootNodes;
+      },
+      []
+    );
+  }, [allAvailableNotes, updateNodeListWithMatchingTags]);
 
   const isSelectedAndLastInTagsList = useCallback(
     (
@@ -126,7 +124,9 @@ const TagsTree = ({
             style={{
               paddingLeft: 16 + 16 * level
             }}
-            onClick={() => onItemClick([...(parentNames ?? []), node.name])}
+            onClick={() => {
+              if (selectTags) selectTags([...(parentNames ?? []), node.name]);
+            }}
           >
             <ListItemText primary={node.name} />
           </ListItem>
@@ -154,7 +154,7 @@ const TagsTree = ({
         </React.Fragment>
       );
     },
-    [isSelectedAndLastInTagsList, onItemClick]
+    [isSelectedAndLastInTagsList, selectTags]
   );
 
   const memoizedTagsList = useMemo<JSX.Element[]>(

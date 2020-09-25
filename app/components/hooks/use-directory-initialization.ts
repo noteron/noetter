@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useContext } from "react";
+import { useEffect, useContext } from "react";
 import fs from "fs";
 import FilePathContext from "../contexts/file-path-context";
 
