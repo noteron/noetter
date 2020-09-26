@@ -21,6 +21,8 @@ import NoteManagementContext from "../note-management/contexts/note-management-c
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
 import { GlobalEventType } from "../events/event-types";
 import { useEventListener } from "../events";
+import useLocalStorageState from "../local-storage-state/use-local-storage-state";
+import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -45,7 +47,10 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const classes = useStyles(theme);
   const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
   const textArea = useRef<HTMLTextAreaElement>(null);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editMode, setEditMode] = useLocalStorageState<boolean>(
+    LocalStorageKeys.EditorMode,
+    false
+  );
   const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
   const [needToHandleInsertCheckbox, setNeedToHandleInsertCheckbox] = useState<
     boolean
@@ -176,9 +181,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   const handleToggleEditMode = useCallback(() => {
-    setEditMode((prev: boolean): boolean => !prev);
+    setEditMode(editMode === undefined ? false : !editMode);
     setNeedToSetFocus(true);
-  }, []);
+  }, [editMode, setEditMode]);
 
   useEventListener(
     GlobalEventType.EditorToggleEditModeTrigger,
