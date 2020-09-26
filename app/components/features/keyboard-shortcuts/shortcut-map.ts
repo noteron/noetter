@@ -46,15 +46,6 @@ const shortcutMap: Shortcut[] = [
       key: "d"
     },
     eventType: GlobalEventType.EditorMakeRowIntoCheckboxTrigger
-  },
-  {
-    name: "Editor: Debug console",
-    keyCombination: {
-      altKey: true,
-      ctrlKey: false,
-      key: "s"
-    },
-    eventType: GlobalEventType.EditorDebugConsoleTrigger
   }
 ];
 
