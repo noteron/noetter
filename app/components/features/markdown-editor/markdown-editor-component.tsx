@@ -3,15 +3,16 @@ import React, {
   useCallback,
   useEffect,
   useContext,
-  useMemo
+  useMemo,
+  createRef
 } from "react";
 import MonacoEditor, {
   ChangeHandler,
   EditorDidMount
 } from "react-monaco-editor";
 import * as monaco from "monaco-editor";
+import { makeStyles, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
-import useMarkdown from "../../hooks/use-markdown";
 import useEditorTools from "./hooks/use-editor-tools";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
@@ -20,8 +21,19 @@ import { GlobalEventType } from "../events/event-types";
 import { useEventListener } from "../events";
 import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
+import useMarkdown from "../../hooks/use-markdown";
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    container: {
+      minHeight: "100vh",
+      height: "100%"
+    }
+  })
+);
 
 const MarkdownEditorComponent = (): JSX.Element => {
+  const classes = useStyles();
   const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
   const [editMode, setEditMode] = useLocalStorageState<boolean>(
     LocalStorageKeys.EditorMode,
@@ -35,6 +47,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const { saveImageFromClipboard } = useImageAttachments();
   const { toggleCheckboxOnCurrentLine } = useEditorTools();
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
+  const monacoContainerRef = createRef<HTMLDivElement>();
 
   const rawMarkdown = useMemo<string>(() => currentNote?.markdown ?? "", [
     currentNote?.markdown
@@ -135,24 +148,29 @@ const MarkdownEditorComponent = (): JSX.Element => {
     handleMakeRowIntoCheckbox
   );
 
-  // const handleOnPaste = useCallback(
-  //   async (event: React.ClipboardEvent<HTMLTextAreaElement>): Promise<void> => {
-  //     const markdownLinkToImage = await saveImageFromClipboard(event);
-  //     insertOrReplaceAtPosition(
-  //       markdownLinkToImage,
-  //       InsertType.ReplaceSelection,
-  //       textArea,
-  //       rawMarkdown,
-  //       handleOnMarkdownUpdated
-  //     );
-  //   },
-  //   [
-  //     handleOnMarkdownUpdated,
-  //     insertOrReplaceAtPosition,
-  //     rawMarkdown,
-  //     saveImageFromClipboard
-  //   ]
-  // );
+  const handleOnPaste = useCallback(
+    async (event: ClipboardEvent): Promise<void> => {
+      if (!editor) return;
+      const markdownLinkToImage = await saveImageFromClipboard(event);
+      const position = editor.getPosition();
+      const selection = editor.getSelection();
+      editor.executeEdits(rawMarkdown, [
+        {
+          range: {
+            startLineNumber:
+              selection?.startLineNumber ?? position?.lineNumber ?? 1,
+            endLineNumber:
+              selection?.endLineNumber ?? position?.lineNumber ?? 1,
+            startColumn: selection?.startColumn ?? position?.column ?? 1,
+            endColumn: selection?.endColumn ?? position?.column ?? 1
+          },
+          text: markdownLinkToImage,
+          forceMoveMarkers: true
+        }
+      ]);
+    },
+    [editor, rawMarkdown, saveImageFromClipboard]
+  );
 
   const handleEditorDidMount: EditorDidMount = useCallback(
     (reference: monaco.editor.IStandaloneCodeEditor) => {
@@ -180,14 +198,25 @@ const MarkdownEditorComponent = (): JSX.Element => {
     applyUpdateCursorPositionHandler
   ]);
 
+  useEffect(() => {
+    const { current } = monacoContainerRef;
+    if (!current) return undefined;
+    current.addEventListener("paste", handleOnPaste);
+    return () => {
+      current.removeEventListener("paste", handleOnPaste);
+    };
+  }, [monacoContainerRef, handleOnPaste]);
+
   return editMode ? (
-    <MonacoEditor
-      theme="vs-dark"
-      language="markdown"
-      value={rawMarkdown}
-      onChange={handleOnChangeEditor}
-      editorDidMount={handleEditorDidMount}
-    />
+    <div ref={monacoContainerRef} className={classes.container}>
+      <MonacoEditor
+        theme="vs-dark"
+        language="markdown"
+        value={rawMarkdown}
+        onChange={handleOnChangeEditor}
+        editorDidMount={handleEditorDidMount}
+      />
+    </div>
   ) : (
     <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
   );

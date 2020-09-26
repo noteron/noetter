@@ -11,9 +11,7 @@ import {
 const acceptedFiles = ["image/gif", "image/png", "image/jpeg", "image/bmp"];
 
 type UseImageAttachmentsState = {
-  saveImageFromClipboard: (
-    event: React.ClipboardEvent<HTMLTextAreaElement>
-  ) => Promise<string>;
+  saveImageFromClipboard: (event: ClipboardEvent) => Promise<string>;
   replaceAttachmentPlaceholders: (markdown: string) => string;
 };
 
@@ -30,7 +28,7 @@ const useImageAttachments = (): UseImageAttachmentsState => {
   );
 
   const saveImageFromClipboard = useCallback(
-    async (event: React.ClipboardEvent<HTMLTextAreaElement>): Promise<string> =>
+    async (event: ClipboardEvent): Promise<string> =>
       new Promise<string>((resolve, reject) => {
         if (
           !event.clipboardData ||
