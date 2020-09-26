@@ -23,6 +23,11 @@ import { useEventListener } from "../events";
 import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 
+const uncheckedCheckboxRegex = /- (\[\]|\[ \])( )*/;
+const checkedCheckboxRegex = /- \[(X|x)\] /;
+
+const [FIRST_COLUMN, FIRST_LINE] = [1, 1];
+
 const MarkdownEditorComponent = (): JSX.Element => {
   const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
   const textArea = useRef<HTMLTextAreaElement>(null);
@@ -118,14 +123,97 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   const handleOnInsertCheckboxShortcut = useCallback(() => {
-    insertOrReplaceAtPosition(
-      " - [ ] ",
-      InsertType.RowStart,
-      textArea,
-      rawMarkdown,
-      handleOnMarkdownUpdated
+    const model = editor?.getModel();
+    if (!editor || !model) return;
+    const uncheckedCheckbox = "- [ ] ";
+    const checkedCheckbox = "- [x] ";
+    const selection = editor.getSelection();
+    const unmodifiedLine = model.getLineContent(
+      selection?.selectionStartLineNumber ?? FIRST_LINE
     );
-  }, [handleOnMarkdownUpdated, insertOrReplaceAtPosition, rawMarkdown]);
+    const uncheckedCheckboxMatch = unmodifiedLine?.match(
+      uncheckedCheckboxRegex
+    );
+    const checkedCheckboxMatch = unmodifiedLine?.match(checkedCheckboxRegex);
+    const isCheckbox: boolean =
+      !!uncheckedCheckboxMatch?.[0] || !!checkedCheckboxMatch?.[0];
+
+    if (!isCheckbox) {
+      const firstColumnAfterWhitespace = model.getLineFirstNonWhitespaceColumn(
+        selection?.startLineNumber ?? FIRST_LINE
+      );
+      const lineContainsNoWhitespace =
+        !unmodifiedLine.startsWith(" ") && !unmodifiedLine.startsWith("\t");
+      const lineIsOnlyWhitespace =
+        !lineContainsNoWhitespace && firstColumnAfterWhitespace === 0;
+
+      const lineIndentation = lineContainsNoWhitespace
+        ? ""
+        : unmodifiedLine.slice(
+            0,
+            lineIsOnlyWhitespace ? undefined : firstColumnAfterWhitespace - 1
+          );
+      const lineContent = lineIsOnlyWhitespace
+        ? ""
+        : unmodifiedLine.slice(
+            lineContainsNoWhitespace ? 0 : firstColumnAfterWhitespace - 1
+          );
+      const updatedLine = `${lineIndentation}${uncheckedCheckbox}${lineContent}`;
+      const lineRange = new monaco.Range(
+        selection?.startLineNumber ?? FIRST_LINE,
+        FIRST_COLUMN,
+        selection?.startLineNumber ?? FIRST_LINE,
+        unmodifiedLine.length + FIRST_COLUMN
+      );
+      model.pushEditOperations(
+        editor.getSelections(),
+        [
+          {
+            range: lineRange,
+            text: updatedLine,
+            forceMoveMarkers: true
+          }
+        ],
+        () => (selection ? [selection] : null)
+      );
+      return;
+    }
+    if (uncheckedCheckboxMatch?.[0]) {
+      const updatedLine = unmodifiedLine.replace(
+        uncheckedCheckboxRegex,
+        checkedCheckbox
+      );
+      const lineRange = new monaco.Range(
+        selection?.startLineNumber ?? FIRST_LINE,
+        FIRST_COLUMN,
+        selection?.startLineNumber ?? FIRST_LINE,
+        unmodifiedLine.length + FIRST_COLUMN
+      );
+      model.pushEditOperations(
+        editor.getSelections(),
+        [{ range: lineRange, text: updatedLine, forceMoveMarkers: true }],
+        () => (selection ? [selection] : null)
+      );
+      return;
+    }
+    if (checkedCheckboxMatch?.[0]) {
+      const updatedLine = unmodifiedLine.replace(
+        checkedCheckboxRegex,
+        uncheckedCheckbox
+      );
+      const lineRange = new monaco.Range(
+        selection?.startLineNumber ?? FIRST_LINE,
+        FIRST_COLUMN,
+        selection?.startLineNumber ?? FIRST_LINE,
+        unmodifiedLine.length + FIRST_COLUMN
+      );
+      model.pushEditOperations(
+        editor.getSelections(),
+        [{ range: lineRange, text: updatedLine, forceMoveMarkers: true }],
+        () => (selection ? [selection] : null)
+      );
+    }
+  }, [editor]);
 
   const handleOnDebugShortcut = useCallback(
     () => writeDebugInfoToConsole(textArea, rawMarkdown),
