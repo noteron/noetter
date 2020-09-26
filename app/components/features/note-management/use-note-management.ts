@@ -12,6 +12,8 @@ import useFileWriter from "./hooks/use-file-writer";
 import { DEFAULT_NOTE } from "./note-management-constants";
 import { EventContextState, GlobalEventType } from "../events/event-types";
 import { useOutsideContextEventListener } from "../events";
+import useLocalStorageState from "../local-storage-state/use-local-storage-state";
+import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 
 const useNoteManagement = (
   events: EventContextState
@@ -22,6 +24,9 @@ const useNoteManagement = (
   const [fileList, setFileList] = useState<FileDescription[]>();
   const [selectedTags, setSelectedTags] = useState<string[]>();
   const [refreshFileListError, setRefreshFileListError] = useState<string>();
+  const [lastOpenFile, setLastOpenFile] = useLocalStorageState<
+    string | undefined
+  >(LocalStorageKeys.LastOpenNoteFileName, undefined);
 
   const openNote = useCallback(
     async (fileDescription: FileDescription): Promise<void> => {
@@ -35,8 +40,9 @@ const useNoteManagement = (
       };
       setSelectedTags(extractSelectedTags(fileDescription.tags));
       setCurrentNote(newCurrentNote);
+      setLastOpenFile(newCurrentNote.fileDescription.fileNameWithoutExtension);
     },
-    [readFileAsync]
+    [readFileAsync, setLastOpenFile]
   );
 
   const refreshFileList = useCallback(
@@ -57,11 +63,19 @@ const useNoteManagement = (
     if (fileList || refreshFileListError) return;
     refreshFileList((fileDescriptions: FileDescription[]) => {
       if (fileDescriptions.length) {
+        const matchingFile = fileDescriptions.find(
+          (f) => f.fileNameWithoutExtension === lastOpenFile
+        );
+        if (matchingFile) {
+          openNote(matchingFile);
+          setSelectedTags(extractSelectedTags(matchingFile.tags));
+          return;
+        }
         openNote(fileDescriptions[0]);
         setSelectedTags(extractSelectedTags(fileDescriptions[0].tags));
       }
     });
-  }, [fileList, openNote, refreshFileList, refreshFileListError]);
+  }, [fileList, lastOpenFile, openNote, refreshFileList, refreshFileListError]);
 
   const handleSaveExistingNote = useCallback(
     async (noteToSave: CurrentNote) => {
