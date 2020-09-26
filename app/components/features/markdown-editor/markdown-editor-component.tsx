@@ -11,6 +11,7 @@ import MonacoEditor, {
   ChangeHandler,
   EditorDidMount
 } from "react-monaco-editor";
+import * as monacoEditor from "monaco-editor/esm/vs/editor/editor.api";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useEditorTools from "./hooks/use-editor-tools";
@@ -87,6 +88,31 @@ const MarkdownEditorComponent = (): JSX.Element => {
     needToSetFocus,
     rawMarkdown.length
   ]);
+
+  const [editor, setEditor] = useState<
+    monacoEditor.editor.IStandaloneCodeEditor
+  >();
+  useEffect(() => {
+    if (!editMode) {
+      setEditor(undefined);
+    }
+  }, [editMode]);
+
+  const handleOnWindowResize = useCallback(
+    (ev) => {
+      if (editor) {
+        editor.layout();
+      }
+    },
+    [editor]
+  );
+
+  useEffect(() => {
+    window.addEventListener("resize", handleOnWindowResize);
+    return () => {
+      window.removeEventListener("resize", handleOnWindowResize);
+    };
+  }, [handleOnWindowResize]);
 
   const updateLastCursorPosition = useCallback(() => {
     const ref = textArea.current;
@@ -204,8 +230,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
-  const handleEditorDidMount: EditorDidMount = useCallback((editor) => {
-    editor.focus();
+  const handleEditorDidMount: EditorDidMount = useCallback((editorInstance) => {
+    setEditor(editorInstance);
+    editorInstance.focus();
   }, []);
 
   const handleOnChangeEditor: ChangeHandler = useCallback(
