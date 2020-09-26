@@ -92,6 +92,28 @@ const MarkdownEditorComponent = (): JSX.Element => {
     rawMarkdown.length
   ]);
 
+  useEffect(() => {
+    if (!editMode) {
+      setEditor(undefined);
+    }
+  }, [editMode]);
+
+  const handleOnWindowResize = useCallback(
+    (ev) => {
+      if (editor) {
+        editor.layout();
+      }
+    },
+    [editor]
+  );
+
+  useEffect(() => {
+    window.addEventListener("resize", handleOnWindowResize);
+    return () => {
+      window.removeEventListener("resize", handleOnWindowResize);
+    };
+  }, [handleOnWindowResize]);
+
   const updateLastCursorPosition = useCallback(() => {
     const ref = textArea.current;
     if (ref)
