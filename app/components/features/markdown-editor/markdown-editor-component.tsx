@@ -11,6 +11,7 @@ import MonacoEditor, {
   ChangeHandler,
   EditorDidMount
 } from "react-monaco-editor";
+import { editor as MonacoEditorTypes } from "monaco-editor";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useEditorTools from "./hooks/use-editor-tools";
@@ -57,6 +58,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
     insertOrReplaceAtPosition,
     writeDebugInfoToConsole
   } = useEditorTools();
+  const [editor, setEditor] = useState<
+    MonacoEditorTypes.IStandaloneCodeEditor
+  >();
 
   const rawMarkdown = useMemo<string>(() => currentNote?.markdown ?? "", [
     currentNote?.markdown
@@ -204,9 +208,12 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
-  const handleEditorDidMount: EditorDidMount = useCallback((editor) => {
-    editor.focus();
-  }, []);
+  const handleEditorDidMount: EditorDidMount = useCallback(
+    (reference: MonacoEditorTypes.IStandaloneCodeEditor) => {
+      setEditor(reference);
+    },
+    []
+  );
 
   const handleOnChangeEditor: ChangeHandler = useCallback(
     (value, event) => {
