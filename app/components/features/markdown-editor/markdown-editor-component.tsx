@@ -7,6 +7,10 @@ import React, {
   useMemo
 } from "react";
 import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
+import MonacoEditor, {
+  ChangeHandler,
+  EditorDidMount
+} from "react-monaco-editor";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useMarkdown from "../../hooks/use-markdown";
 import useEditorTools from "./hooks/use-editor-tools";
@@ -200,22 +204,27 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
-  return (
-    <VerticalDisplaySection>
-      {editMode ? (
-        <textarea
-          ref={textArea}
-          draggable={false}
-          className={classes.textArea}
-          onChange={handleOnTextAreaChanged}
-          value={rawMarkdown}
-          onPaste={handleOnPaste}
-          onKeyDown={updateLastCursorPosition}
-        />
-      ) : (
-        renderedMarkdown
-      )}
-    </VerticalDisplaySection>
+  const handleEditorDidMount: EditorDidMount = useCallback((editor) => {
+    editor.focus();
+  }, []);
+
+  const handleOnChangeEditor: ChangeHandler = useCallback(
+    (value, event) => {
+      handleOnMarkdownUpdated(value);
+    },
+    [handleOnMarkdownUpdated]
+  );
+
+  return editMode ? (
+    <MonacoEditor
+      theme="vs-dark"
+      language="markdown"
+      value={rawMarkdown}
+      onChange={handleOnChangeEditor}
+      editorDidMount={handleEditorDidMount}
+    />
+  ) : (
+    <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
   );
 };
 
