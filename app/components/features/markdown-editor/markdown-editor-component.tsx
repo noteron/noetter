@@ -1,58 +1,53 @@
 import React, {
   useState,
   useCallback,
-  useRef,
   useEffect,
   useContext,
-  useMemo
+  useMemo,
+  createRef
 } from "react";
-import { useTheme, makeStyles, Theme, createStyles } from "@material-ui/core";
+import MonacoEditor, {
+  ChangeHandler,
+  EditorDidMount
+} from "react-monaco-editor";
+import * as monaco from "monaco-editor";
+import { makeStyles, createStyles } from "@material-ui/core";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
-import useMarkdown from "../../hooks/use-markdown";
 import useEditorTools from "./hooks/use-editor-tools";
-import { InsertType, CursorPosition } from "./editor-types";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
 import { GlobalEventType } from "../events/event-types";
 import { useEventListener } from "../events";
+import useLocalStorageState from "../local-storage-state/use-local-storage-state";
+import LocalStorageKeys from "../local-storage-state/local-storage-keys";
+import useMarkdown from "../../hooks/use-markdown";
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
-    textArea: {
-      border: "none",
-      backgroundColor: theme.palette.background.paper,
-      color: theme.palette.text.primary,
-      height: "100%",
-      width: "100%",
-      fontFamily: "monospace",
-      fontSize: 20,
-      resize: "none",
-      "&:focus": {
-        outline: "none"
-      }
+    container: {
+      minHeight: "100vh",
+      height: "100%"
     }
   })
 );
 
 const MarkdownEditorComponent = (): JSX.Element => {
-  const theme = useTheme();
-  const classes = useStyles(theme);
+  const classes = useStyles();
   const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
-  const textArea = useRef<HTMLTextAreaElement>(null);
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [needToSetFocus, setNeedToSetFocus] = useState<boolean>(false);
-  const [needToHandleInsertCheckbox, setNeedToHandleInsertCheckbox] = useState<
-    boolean
-  >(false);
-  const [lastCursorPosition, setLastCursorPosition] = useState<
-    CursorPosition
-  >();
+  const [editMode, setEditMode] = useLocalStorageState<boolean>(
+    LocalStorageKeys.EditorMode,
+    false
+  );
+  const [queueFocus, setQueueFocus] = useState<boolean>(false);
+  const [queueInsertCheckbox, setQueueInsertCheckbox] = useState<boolean>(
+    false
+  );
+  const [cursorPosition, setCursorPosition] = useState<monaco.Position>();
   const { saveImageFromClipboard } = useImageAttachments();
-  const {
-    insertOrReplaceAtPosition,
-    writeDebugInfoToConsole
-  } = useEditorTools();
+  const { toggleCheckboxOnCurrentLine } = useEditorTools();
+  const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
+  const monacoContainerRef = createRef<HTMLDivElement>();
 
   const rawMarkdown = useMemo<string>(() => currentNote?.markdown ?? "", [
     currentNote?.markdown
@@ -60,45 +55,45 @@ const MarkdownEditorComponent = (): JSX.Element => {
   const renderedMarkdown = useMarkdown(currentNote?.markdown ?? "");
 
   useEffect(() => {
-    const ref = textArea.current;
-    if (editMode && needToSetFocus && ref) {
-      if (ref.ATTRIBUTE_NODE) ref.focus();
-      const fallbackCursorPosition = rawMarkdown.length;
-      ref.selectionStart = lastCursorPosition?.start ?? fallbackCursorPosition;
-      ref.selectionEnd = lastCursorPosition?.end ?? fallbackCursorPosition;
-      ref.selectionDirection =
-        // eslint-disable-next-line no-nested-ternary
-        lastCursorPosition?.isForwardSelection === undefined
-          ? "none"
-          : lastCursorPosition.isForwardSelection
-          ? "forward"
-          : "backward";
-      setNeedToSetFocus(false);
-    }
-  }, [
-    editMode,
-    lastCursorPosition?.end,
-    lastCursorPosition?.isForwardSelection,
-    lastCursorPosition?.start,
-    needToSetFocus,
-    rawMarkdown.length
-  ]);
-
-  const updateLastCursorPosition = useCallback(() => {
-    const ref = textArea.current;
-    if (ref)
-      setLastCursorPosition({
-        start: ref.selectionStart,
-        end: ref.selectionEnd,
-        isForwardSelection: ref.selectionDirection === "forward",
-        isSelection: ref.selectionDirection === "none"
+    if (!queueFocus || !editMode || !editor) return;
+    if (!cursorPosition) {
+      const layoutInfo = editor.getLayoutInfo();
+      editor.setPosition({
+        column: layoutInfo.contentWidth,
+        lineNumber: layoutInfo.lineNumbersWidth
       });
-  }, []);
+    } else {
+      editor.setPosition(cursorPosition);
+    }
+    editor.focus();
+    setQueueFocus(false);
+  }, [editMode, editor, queueFocus, cursorPosition, rawMarkdown.length]);
+
+  useEffect(() => {
+    if (!editMode) {
+      setEditor(undefined);
+    }
+  }, [editMode]);
+
+  const handleOnWindowResize = useCallback(
+    (ev) => {
+      if (editor) {
+        editor.layout();
+      }
+    },
+    [editor]
+  );
+
+  useEffect(() => {
+    window.addEventListener("resize", handleOnWindowResize);
+    return () => {
+      window.removeEventListener("resize", handleOnWindowResize);
+    };
+  }, [handleOnWindowResize]);
 
   const handleOnMarkdownUpdated = useCallback(
     (newMarkdown: string) => {
       if (!updateCurrentNote) return;
-      updateLastCursorPosition();
       updateCurrentNote({
         markdown: newMarkdown,
         fileDescription: {
@@ -125,30 +120,14 @@ const MarkdownEditorComponent = (): JSX.Element => {
       currentNote?.fileDescription.fileNameWithoutExtension,
       currentNote?.fileDescription.tags,
       currentNote?.fileDescription.title,
-      updateCurrentNote,
-      updateLastCursorPosition
+      updateCurrentNote
     ]
   );
 
-  const handleOnInsertCheckboxShortcut = useCallback(() => {
-    insertOrReplaceAtPosition(
-      " - [ ] ",
-      InsertType.RowStart,
-      textArea,
-      rawMarkdown,
-      handleOnMarkdownUpdated
-    );
-  }, [handleOnMarkdownUpdated, insertOrReplaceAtPosition, rawMarkdown]);
-
-  const handleOnDebugShortcut = useCallback(
-    () => writeDebugInfoToConsole(textArea, rawMarkdown),
-    [rawMarkdown, writeDebugInfoToConsole]
-  );
-
   const handleToggleEditMode = useCallback(() => {
-    setEditMode((prev: boolean): boolean => !prev);
-    setNeedToSetFocus(true);
-  }, []);
+    setEditMode(editMode === undefined ? false : !editMode);
+    setQueueFocus(true);
+  }, [editMode, setEditMode]);
 
   useEventListener(
     GlobalEventType.EditorToggleEditModeTrigger,
@@ -156,13 +135,12 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   useEffect(() => {
-    if (!needToHandleInsertCheckbox) return;
-    handleOnInsertCheckboxShortcut();
-    setNeedToHandleInsertCheckbox(false);
-  }, [handleOnInsertCheckboxShortcut, needToHandleInsertCheckbox]);
-
+    if (!queueInsertCheckbox || !editor) return;
+    toggleCheckboxOnCurrentLine(editor);
+    setQueueInsertCheckbox(false);
+  }, [editor, queueInsertCheckbox, toggleCheckboxOnCurrentLine]);
   const handleMakeRowIntoCheckbox = useCallback(
-    () => setNeedToHandleInsertCheckbox(true),
+    () => setQueueInsertCheckbox(true),
     []
   );
   useEventListener(
@@ -170,52 +148,77 @@ const MarkdownEditorComponent = (): JSX.Element => {
     handleMakeRowIntoCheckbox
   );
 
-  useEventListener(
-    GlobalEventType.EditorDebugConsoleTrigger,
-    handleOnDebugShortcut
+  const handleOnPaste = useCallback(
+    async (event: ClipboardEvent): Promise<void> => {
+      if (!editor) return;
+      const markdownLinkToImage = await saveImageFromClipboard(event);
+      const position = editor.getPosition();
+      const selection = editor.getSelection();
+      editor.executeEdits(rawMarkdown, [
+        {
+          range: {
+            startLineNumber:
+              selection?.startLineNumber ?? position?.lineNumber ?? 1,
+            endLineNumber:
+              selection?.endLineNumber ?? position?.lineNumber ?? 1,
+            startColumn: selection?.startColumn ?? position?.column ?? 1,
+            endColumn: selection?.endColumn ?? position?.column ?? 1
+          },
+          text: markdownLinkToImage,
+          forceMoveMarkers: true
+        }
+      ]);
+    },
+    [editor, rawMarkdown, saveImageFromClipboard]
   );
 
-  const handleOnTextAreaChanged = useCallback(
-    (event: React.ChangeEvent<HTMLTextAreaElement>): void =>
-      handleOnMarkdownUpdated(event.target.value),
+  const handleEditorDidMount: EditorDidMount = useCallback(
+    (reference: monaco.editor.IStandaloneCodeEditor) => {
+      setEditor(reference);
+    },
+    []
+  );
+
+  const handleOnChangeEditor: ChangeHandler = useCallback(
+    (value) => {
+      handleOnMarkdownUpdated(value);
+    },
     [handleOnMarkdownUpdated]
   );
 
-  const handleOnPaste = useCallback(
-    async (event: React.ClipboardEvent<HTMLTextAreaElement>): Promise<void> => {
-      const markdownLinkToImage = await saveImageFromClipboard(event);
-      insertOrReplaceAtPosition(
-        markdownLinkToImage,
-        InsertType.ReplaceSelection,
-        textArea,
-        rawMarkdown,
-        handleOnMarkdownUpdated
-      );
-    },
-    [
-      handleOnMarkdownUpdated,
-      insertOrReplaceAtPosition,
-      rawMarkdown,
-      saveImageFromClipboard
-    ]
-  );
+  const applyUpdateCursorPositionHandler = useCallback(() => {
+    if (!editor) return;
+    editor.onDidChangeCursorPosition((e) => {
+      const position = editor.getPosition();
+      setCursorPosition(position ?? undefined);
+    });
+  }, [editor]);
 
-  return (
-    <VerticalDisplaySection>
-      {editMode ? (
-        <textarea
-          ref={textArea}
-          draggable={false}
-          className={classes.textArea}
-          onChange={handleOnTextAreaChanged}
-          value={rawMarkdown}
-          onPaste={handleOnPaste}
-          onKeyDown={updateLastCursorPosition}
-        />
-      ) : (
-        renderedMarkdown
-      )}
-    </VerticalDisplaySection>
+  useEffect(applyUpdateCursorPositionHandler, [
+    applyUpdateCursorPositionHandler
+  ]);
+
+  useEffect(() => {
+    const { current } = monacoContainerRef;
+    if (!current) return undefined;
+    current.addEventListener("paste", handleOnPaste);
+    return () => {
+      current.removeEventListener("paste", handleOnPaste);
+    };
+  }, [monacoContainerRef, handleOnPaste]);
+
+  return editMode ? (
+    <div ref={monacoContainerRef} className={classes.container}>
+      <MonacoEditor
+        theme="vs-dark"
+        language="markdown"
+        value={rawMarkdown}
+        onChange={handleOnChangeEditor}
+        editorDidMount={handleEditorDidMount}
+      />
+    </div>
+  ) : (
+    <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
   );
 };
 

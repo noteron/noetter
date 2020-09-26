@@ -9,7 +9,7 @@ const useLocalStorageState = <T>(
 
   const getFromLocalStorage = useCallback((): T | undefined => {
     const raw = localStorage.getItem(localStorageKey) ?? undefined;
-    if (raw === undefined) return raw;
+    if (raw === undefined || raw === "undefined") return undefined;
     const t: T = JSON.parse(raw);
     return t;
   }, [localStorageKey]);

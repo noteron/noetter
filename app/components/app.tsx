@@ -47,7 +47,8 @@ const useStyles = makeStyles(() =>
     item: {
       padding: 0,
       flexGrow: 1,
-      height: "100vh"
+      height: "100vh",
+      position: "relative"
     }
   })
 );
