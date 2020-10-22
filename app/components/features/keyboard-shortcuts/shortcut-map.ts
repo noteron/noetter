@@ -46,6 +46,24 @@ const shortcutMap: Shortcut[] = [
       key: "d"
     },
     eventType: GlobalEventType.EditorMakeRowIntoCheckboxTrigger
+  },
+  {
+    name: "Editor: Increase font size",
+    keyCombination: {
+      altKey: false,
+      ctrlKey: true,
+      key: "+"
+    },
+    eventType: GlobalEventType.EditorIncreaseFontSize
+  },
+  {
+    name: "Editor: Decrease font size",
+    keyCombination: {
+      altKey: false,
+      ctrlKey: true,
+      key: "-"
+    },
+    eventType: GlobalEventType.EditorDecreaseFontSize
   }
 ];
 

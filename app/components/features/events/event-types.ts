@@ -3,7 +3,9 @@ export enum GlobalEventType {
   NoteManagementCreateNewNoteTrigger = "NoteManagementCreateNewNoteTrigger",
   NoteManagementSaveCurrentNoteTrigger = "NoteManagementSaveCurrentNoteTrigger",
   EditorToggleEditModeTrigger = "EditorToggleEditModeTrigger",
-  EditorMakeRowIntoCheckboxTrigger = "EditorMakeRowIntoCheckboxTrigger"
+  EditorMakeRowIntoCheckboxTrigger = "EditorMakeRowIntoCheckboxTrigger",
+  EditorIncreaseFontSize = "EditorIncreaseFontSize",
+  EditorDecreaseFontSize = "EditorDecreaseFontSize"
 }
 
 export type GlobalEventListener = {
