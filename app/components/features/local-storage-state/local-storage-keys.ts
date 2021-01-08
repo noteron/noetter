@@ -1,6 +1,7 @@
 enum LocalStorageKeys {
   LastOpenNoteFileName = "LastOpenNoteFileName",
-  EditorMode = "EditorMode"
+  EditorMode = "EditorMode",
+  EditorFontSize = "EditorFontSize"
 }
 
 export default LocalStorageKeys;

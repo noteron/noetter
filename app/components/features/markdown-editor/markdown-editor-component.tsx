@@ -22,6 +22,7 @@ import { useEventListener } from "../events";
 import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 import useMarkdown from "../../hooks/use-markdown";
+import useEditorFontSize from "./hooks/use-editor-font-size";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -53,6 +54,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
     currentNote?.markdown
   ]);
   const renderedMarkdown = useMarkdown(currentNote?.markdown ?? "");
+  const editorFontSize = useEditorFontSize();
 
   useEffect(() => {
     if (!queueFocus || !editMode || !editor) return;
@@ -215,6 +217,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
         value={rawMarkdown}
         onChange={handleOnChangeEditor}
         editorDidMount={handleEditorDidMount}
+        options={{ fontSize: editorFontSize }}
       />
     </div>
   ) : (
