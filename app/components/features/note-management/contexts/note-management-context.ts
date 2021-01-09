@@ -4,6 +4,7 @@ import { CurrentNote, FileDescription } from "../note-management-types";
 export type NoteManagementContextState = {
   currentNote?: CurrentNote;
   updateCurrentNote?: (updatedNote: CurrentNote) => void;
+  updateTags?: (newTags: string[]) => void;
   selectedTags?: string[];
   selectTags?: (newTags: string[]) => void;
   openNote?: (availableNote: FileDescription) => Promise<void>;

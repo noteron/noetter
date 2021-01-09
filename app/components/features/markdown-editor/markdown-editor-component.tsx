@@ -11,7 +11,14 @@ import MonacoEditor, {
   EditorDidMount
 } from "react-monaco-editor";
 import * as monaco from "monaco-editor";
-import { makeStyles, createStyles } from "@material-ui/core";
+import {
+  makeStyles,
+  createStyles,
+  IconButton,
+  Tooltip
+} from "@material-ui/core";
+import { Edit, Label } from "@material-ui/icons";
+import { ToggleButton } from "@material-ui/lab";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useEditorTools from "./hooks/use-editor-tools";
 import useImageAttachments from "./hooks/use-image-attachments";
@@ -23,6 +30,7 @@ import useLocalStorageState from "../local-storage-state/use-local-storage-state
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 import useMarkdown from "../../hooks/use-markdown";
 import useEditorFontSize from "./hooks/use-editor-font-size";
+import TagButton from "./tag-button";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -35,7 +43,9 @@ const useStyles = makeStyles(() =>
 
 const MarkdownEditorComponent = (): JSX.Element => {
   const classes = useStyles();
-  const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
+  const { currentNote, updateCurrentNote, updateTags } = useContext(
+    NoteManagementContext
+  );
   const [editMode, setEditMode] = useLocalStorageState<boolean>(
     LocalStorageKeys.EditorMode,
     false
@@ -126,6 +136,14 @@ const MarkdownEditorComponent = (): JSX.Element => {
     ]
   );
 
+  const handleOnTagsUpdated = useCallback(
+    (newTags: string[] | undefined) => {
+      if (!updateTags) return;
+      updateTags(newTags ?? []);
+    },
+    [updateTags]
+  );
+
   const handleToggleEditMode = useCallback(() => {
     setEditMode(editMode === undefined ? false : !editMode);
     setQueueFocus(true);
@@ -209,19 +227,38 @@ const MarkdownEditorComponent = (): JSX.Element => {
     };
   }, [monacoContainerRef, handleOnPaste]);
 
-  return editMode ? (
-    <div ref={monacoContainerRef} className={classes.container}>
-      <MonacoEditor
-        theme="vs-dark"
-        language="markdown"
-        value={rawMarkdown}
-        onChange={handleOnChangeEditor}
-        editorDidMount={handleEditorDidMount}
-        options={{ fontSize: editorFontSize }}
-      />
-    </div>
-  ) : (
-    <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
+  return (
+    <>
+      <div>
+        <Tooltip title="Toggle edit mode" aria-label="toggle edit mode">
+          <ToggleButton
+            size="small"
+            onChange={handleToggleEditMode}
+            selected={editMode ?? false}
+          >
+            <Edit />
+          </ToggleButton>
+        </Tooltip>
+        <TagButton
+          tags={currentNote?.fileDescription?.tags}
+          onTagsUpdated={handleOnTagsUpdated}
+        />
+      </div>
+      {editMode ? (
+        <div ref={monacoContainerRef} className={classes.container}>
+          <MonacoEditor
+            theme="vs-dark"
+            language="markdown"
+            value={rawMarkdown}
+            onChange={handleOnChangeEditor}
+            editorDidMount={handleEditorDidMount}
+            options={{ fontSize: editorFontSize }}
+          />
+        </div>
+      ) : (
+        <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
+      )}
+    </>
   );
 };
 
