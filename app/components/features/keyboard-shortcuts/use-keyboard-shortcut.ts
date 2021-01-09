@@ -23,7 +23,7 @@ const useKeyboardShortcut = (shortcut: Shortcut, callback: () => void) => {
 
   useEffect(() => {
     document.addEventListener(keyDownEvent, handleKeydown);
-    return () => document.removeEventListener(keyDownEvent, callback);
+    return () => document.removeEventListener(keyDownEvent, handleKeydown);
   });
 };
 
