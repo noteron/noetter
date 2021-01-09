@@ -10,14 +10,13 @@ import { NoteManagementContextState } from "./contexts/note-management-context";
 import { CurrentNote, FileDescription } from "./note-management-types";
 import useFileWriter from "./hooks/use-file-writer";
 import { DEFAULT_NOTE } from "./note-management-constants";
-import { EventContextState, GlobalEventType } from "../events/event-types";
-import { useOutsideContextEventListener } from "../events";
 import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
+import useKeyboardShortcut from "../keyboard-shortcuts";
+import shortcuts from "../keyboard-shortcuts/shortcuts";
+import { ShortcutIdentifiers } from "../keyboard-shortcuts/types";
 
-const useNoteManagement = (
-  events: EventContextState
-): NoteManagementContextState => {
+const useNoteManagement = (): NoteManagementContextState => {
   const { getFileDescriptions, readFileAsync } = useFileReader();
   const { saveExistingFile, saveNewFile } = useFileWriter();
   const [currentNote, setCurrentNote] = useState<CurrentNote>(DEFAULT_NOTE);
@@ -155,10 +154,9 @@ const useNoteManagement = (
       .catch(() => {});
   }, [saveNote]);
 
-  useOutsideContextEventListener(
-    GlobalEventType.NoteManagementSaveCurrentNoteTrigger,
-    saveNoteEventTriggerHandler,
-    events
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.SaveCurrentNote],
+    saveNoteEventTriggerHandler
   );
 
   const createNewNoteEventTriggerHandler = useCallback(() => {
@@ -167,10 +165,9 @@ const useNoteManagement = (
       .catch(() => {});
   }, [createNewNote]);
 
-  useOutsideContextEventListener(
-    GlobalEventType.NoteManagementCreateNewNoteTrigger,
-    createNewNoteEventTriggerHandler,
-    events
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.CreateNewNote],
+    createNewNoteEventTriggerHandler
   );
 
   return {

@@ -16,9 +16,7 @@ import useSettings from "./hooks/use-settings";
 import useNoteManagement, {
   NoteManagementContext
 } from "./features/note-management";
-import useEvents, { EventContext } from "./features/events";
 import useZenMode from "./hooks/use-zen-mode";
-import useKeyboardShortcuts from "./features/keyboard-shortcuts";
 
 const darkTheme = createMuiTheme({
   palette: {
@@ -60,43 +58,39 @@ export type Note = {
 
 const App = (): JSX.Element => {
   useDirectoryInitialization();
-  const events = useEvents();
-  const noteManagement = useNoteManagement(events);
+  const noteManagement = useNoteManagement();
   const classes = useStyles();
-  const zenMode = useZenMode(events);
+  const zenMode = useZenMode();
   const settings = useSettings();
-  useKeyboardShortcuts(events);
 
   return (
     <>
-      <EventContext.Provider value={events}>
-        <NoteManagementContext.Provider value={noteManagement}>
-          <ThemeProvider theme={darkTheme}>
-            <CssBaseline />
-            <Grid
-              container
-              justify="center"
-              direction="row"
-              className={classes.root}
-            >
-              {!zenMode && (
-                <Grid item xs={2} className={classes.item}>
-                  <TagsTree onSettingsClick={settings.onOpen} />
-                </Grid>
-              )}
-              {!zenMode && (
-                <Grid item xs={3} className={classes.item}>
-                  <NotesList />
-                </Grid>
-              )}
-              <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
-                <MarkdownEditor />
+      <NoteManagementContext.Provider value={noteManagement}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <Grid
+            container
+            justify="center"
+            direction="row"
+            className={classes.root}
+          >
+            {!zenMode && (
+              <Grid item xs={2} className={classes.item}>
+                <TagsTree onSettingsClick={settings.onOpen} />
               </Grid>
+            )}
+            {!zenMode && (
+              <Grid item xs={3} className={classes.item}>
+                <NotesList />
+              </Grid>
+            )}
+            <Grid item xs={zenMode ? 12 : 7} className={classes.item}>
+              <MarkdownEditor />
             </Grid>
-            <SettingsDrawer settings={settings} />
-          </ThemeProvider>
-        </NoteManagementContext.Provider>
-      </EventContext.Provider>
+          </Grid>
+          <SettingsDrawer settings={settings} />
+        </ThemeProvider>
+      </NoteManagementContext.Provider>
     </>
   );
 };
