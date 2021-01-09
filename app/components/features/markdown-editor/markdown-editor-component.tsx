@@ -17,12 +17,13 @@ import useEditorTools from "./hooks/use-editor-tools";
 import useImageAttachments from "./hooks/use-image-attachments";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
-import { GlobalEventType } from "../events/event-types";
-import { useEventListener } from "../events";
 import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 import useMarkdown from "../../hooks/use-markdown";
 import useEditorFontSize from "./hooks/use-editor-font-size";
+import useKeyboardShortcut from "../keyboard-shortcuts";
+import shortcuts from "../keyboard-shortcuts/shortcuts";
+import { ShortcutIdentifiers } from "../keyboard-shortcuts/types";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -75,7 +76,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
     if (!editMode) {
       setEditor(undefined);
     }
-  }, [editMode]);
+  }, [editMode, editor]);
 
   const handleOnWindowResize = useCallback(
     (ev) => {
@@ -88,9 +89,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   useEffect(() => {
     window.addEventListener("resize", handleOnWindowResize);
-    return () => {
-      window.removeEventListener("resize", handleOnWindowResize);
-    };
+    return () => window.removeEventListener("resize", handleOnWindowResize);
   }, [handleOnWindowResize]);
 
   const handleOnMarkdownUpdated = useCallback(
@@ -127,12 +126,17 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   const handleToggleEditMode = useCallback(() => {
-    setEditMode(editMode === undefined ? false : !editMode);
-    setQueueFocus(true);
-  }, [editMode, setEditMode]);
+    const updatedEditMode = editMode === undefined ? false : !editMode;
+    if (updatedEditMode) {
+      setQueueFocus(true);
+    } else {
+      editor?.dispose();
+    }
+    setEditMode(updatedEditMode);
+  }, [editMode, editor, setEditMode]);
 
-  useEventListener(
-    GlobalEventType.EditorToggleEditModeTrigger,
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.ToggleEditMode],
     handleToggleEditMode
   );
 
@@ -145,8 +149,9 @@ const MarkdownEditorComponent = (): JSX.Element => {
     () => setQueueInsertCheckbox(true),
     []
   );
-  useEventListener(
-    GlobalEventType.EditorMakeRowIntoCheckboxTrigger,
+
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.ToggleCheckbox],
     handleMakeRowIntoCheckbox
   );
 
