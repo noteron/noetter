@@ -12,7 +12,6 @@ import MonacoEditor, {
 } from "react-monaco-editor";
 import * as monaco from "monaco-editor";
 import { makeStyles, createStyles } from "@material-ui/core";
-import { SIGABRT } from "constants";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useEditorTools from "./hooks/use-editor-tools";
 import useImageAttachments from "./hooks/use-image-attachments";
@@ -77,7 +76,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
     if (!editMode) {
       setEditor(undefined);
     }
-  }, [editMode]);
+  }, [editMode, editor]);
 
   const handleOnWindowResize = useCallback(
     (ev) => {
@@ -90,9 +89,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   useEffect(() => {
     window.addEventListener("resize", handleOnWindowResize);
-    return () => {
-      window.removeEventListener("resize", handleOnWindowResize);
-    };
+    return () => window.removeEventListener("resize", handleOnWindowResize);
   }, [handleOnWindowResize]);
 
   const handleOnMarkdownUpdated = useCallback(
@@ -129,9 +126,14 @@ const MarkdownEditorComponent = (): JSX.Element => {
   );
 
   const handleToggleEditMode = useCallback(() => {
-    setEditMode(editMode === undefined ? false : !editMode);
-    setQueueFocus(true);
-  }, [editMode, setEditMode]);
+    const updatedEditMode = editMode === undefined ? false : !editMode;
+    if (updatedEditMode) {
+      setQueueFocus(true);
+    } else {
+      editor?.dispose();
+    }
+    setEditMode(updatedEditMode);
+  }, [editMode, editor, setEditMode]);
 
   useKeyboardShortcut(
     shortcuts[ShortcutIdentifiers.ToggleEditMode],
