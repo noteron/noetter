@@ -6,10 +6,10 @@ import { ShortcutIdentifiers } from "../features/keyboard-shortcuts/types";
 const useZenMode = (): boolean => {
   const [zenMode, setZenMode] = useState<boolean>(false);
 
-  const toggleZenMode = useCallback(
-    () => setZenMode((prev: boolean) => !prev),
-    []
-  );
+  const toggleZenMode = useCallback(() => {
+    setZenMode((prev: boolean) => !prev);
+    window.dispatchEvent(new Event("resize"));
+  }, []);
 
   useKeyboardShortcut(
     shortcuts[ShortcutIdentifiers.ToggleZenMode],
