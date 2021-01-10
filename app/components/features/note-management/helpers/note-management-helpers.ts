@@ -19,7 +19,7 @@ export const extractMarkdownFromRawFile = (fileContents: string): string => {
 };
 
 export const extractSelectedTags = (tags?: string[]): string[] =>
-  tags?.[0].split("/") ?? [];
+  tags?.[0]?.split("/") ?? [];
 
 export const extractTitleFromMarkdownMainTitle = (
   currentNote: CurrentNote

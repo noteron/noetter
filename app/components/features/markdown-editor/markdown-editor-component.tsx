@@ -1,30 +1,30 @@
+import { createStyles, makeStyles, Tooltip } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
+import { ToggleButton } from "@material-ui/lab";
+import * as monaco from "monaco-editor";
 import React, {
-  useState,
+  createRef,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
-  createRef
+  useState
 } from "react";
 import MonacoEditor, {
   ChangeHandler,
   EditorDidMount
 } from "react-monaco-editor";
-import * as monaco from "monaco-editor";
-import { makeStyles, createStyles, Tooltip } from "@material-ui/core";
-import { Edit } from "@material-ui/icons";
-import { ToggleButton } from "@material-ui/lab";
+import useMarkdown from "../../hooks/use-markdown";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
-import useEditorTools from "./hooks/use-editor-tools";
-import useImageAttachments from "./hooks/use-image-attachments";
+import { useEventListener } from "../events";
+import { GlobalEventType } from "../events/event-types";
+import LocalStorageKeys from "../local-storage-state/local-storage-keys";
+import useLocalStorageState from "../local-storage-state/use-local-storage-state";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { DEFAULT_NOTE } from "../note-management/note-management-constants";
-import { GlobalEventType } from "../events/event-types";
-import { useEventListener } from "../events";
-import useLocalStorageState from "../local-storage-state/use-local-storage-state";
-import LocalStorageKeys from "../local-storage-state/local-storage-keys";
-import useMarkdown from "../../hooks/use-markdown";
 import useEditorFontSize from "./hooks/use-editor-font-size";
+import useEditorTools from "./hooks/use-editor-tools";
+import useImageAttachments from "./hooks/use-image-attachments";
 import TagButton from "./tag-button";
 
 const useStyles = makeStyles(() =>
@@ -119,7 +119,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
       console.log("handleOnTagsUpdated. Take newTags and save on file");
       console.log(newTags);
       if (!updateTags) return;
-      updateTags(newTags ?? []);
+      updateTags(newTags?.length ? newTags : ["Untagged"]);
     },
     [updateTags]
   );

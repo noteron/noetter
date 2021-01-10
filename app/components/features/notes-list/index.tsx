@@ -13,19 +13,19 @@ const NotesList = (): JSX.Element => {
   ]);
   const filteredFileList = useMemo<FileDescription[]>(() => {
     return (allAvailableNotes ?? []).filter((fileDescription) => {
-      if (!selectedTags) {
+      if (!selectedTags?.length) {
         return true;
       }
       return fileDescription.tags.some((tagString) => {
         const tagsList = tagString.split("/");
-        let noMissmatchFound = true;
+        let noMismatchFound = true;
         (selectedTags ?? []).forEach((selectedTag, index) => {
-          if (!noMissmatchFound) return;
+          if (!noMismatchFound) return;
           if (selectedTag !== tagsList[index]) {
-            noMissmatchFound = false;
+            noMismatchFound = false;
           }
         });
-        return noMissmatchFound;
+        return noMismatchFound;
       });
     });
   }, [allAvailableNotes, selectedTags]);
