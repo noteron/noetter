@@ -11,10 +11,24 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import path from "path";
+import os, { platform } from "os";
 import { app, BrowserWindow } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
 import MenuBuilder from "./menu";
+
+enum NodeJsPlatform {
+  Aix = "aix",
+  Android = "android",
+  Darwin = "darwin",
+  FreeBsd = "freebsd",
+  Linux = "linux",
+  OpenBsd = "openbsd",
+  Sunos = "sunos",
+  Windows = "win32",
+  Cygwin = "cygwin",
+  NetBsd = "netbsd"
+}
 
 export default class AppUpdater {
   constructor() {
@@ -98,6 +112,19 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  // Refer to https://www.electronjs.org/docs/tutorial/devtools-extension#how-to-load-a-devtools-extension
+  // for more information on platform specifics
+  const reactDevToolsId = "fmkadmapgofadopljbjfkapdkoienihi";
+  const reactDevToolsVersion = "4.10.1_0";
+  BrowserWindow.addDevToolsExtension(
+    os.platform() === NodeJsPlatform.Windows
+      ? path.join(
+          os.homedir(),
+          `AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\${reactDevToolsId}\\${reactDevToolsVersion}`
+        )
+      : `~/.config/google-chrome/Default/Extensions/${reactDevToolsId}/${reactDevToolsVersion}`
+  );
 };
 
 /**

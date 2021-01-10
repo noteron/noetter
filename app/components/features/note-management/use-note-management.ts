@@ -148,6 +148,13 @@ const useNoteManagement = (): NoteManagementContextState => {
     []
   );
 
+  const updateTags = useCallback((newTags: string[]) => {
+    setCurrentNote((prev) => ({
+      ...prev,
+      fileDescription: { ...prev.fileDescription, tags: newTags }
+    }));
+  }, []);
+
   const saveNoteEventTriggerHandler = useCallback(() => {
     saveNote()
       .then(() => undefined)
@@ -175,6 +182,7 @@ const useNoteManagement = (): NoteManagementContextState => {
     allAvailableNotes: fileList,
     currentNote,
     updateCurrentNote,
+    updateTags,
     openNote,
     selectedTags,
     selectTags,

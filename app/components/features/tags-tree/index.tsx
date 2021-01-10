@@ -128,7 +128,7 @@ const TagsTree = ({ onSettingsClick }: Props): JSX.Element => {
               if (selectTags) selectTags([...(parentNames ?? []), node.name]);
             }}
           >
-            <ListItemText primary={node.name} />
+            <ListItemText primary={node.name.length ? node.name : "Untagged"} />
           </ListItem>
           {node.children && (
             <List disablePadding dense>

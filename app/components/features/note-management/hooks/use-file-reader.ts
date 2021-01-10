@@ -69,7 +69,11 @@ const useFileReader = (): FileReaderReturnProps => {
           // );
 
           if (line.startsWith("tags: ")) {
-            tags = line.replace("tags: [", "").replaceAll("]", "").split(",");
+            tags = line
+              .replace("tags: [", "")
+              .replaceAll("]", "")
+              .split(",")
+              .filter((t) => t.length);
           }
           if (line.startsWith("title: ")) {
             title = line.replace("title: ", "");

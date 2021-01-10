@@ -1,29 +1,30 @@
+import { createStyles, makeStyles } from "@material-ui/core";
+import * as monaco from "monaco-editor";
 import React, {
-  useState,
+  createRef,
   useCallback,
-  useEffect,
   useContext,
+  useEffect,
   useMemo,
-  createRef
+  useState
 } from "react";
 import MonacoEditor, {
   ChangeHandler,
   EditorDidMount
 } from "react-monaco-editor";
-import * as monaco from "monaco-editor";
-import { makeStyles, createStyles } from "@material-ui/core";
-import VerticalDisplaySection from "../../layout/vertical-display-section";
-import useEditorTools from "./hooks/use-editor-tools";
-import useImageAttachments from "./hooks/use-image-attachments";
-import NoteManagementContext from "../note-management/contexts/note-management-context";
-import { DEFAULT_NOTE } from "../note-management/note-management-constants";
-import useLocalStorageState from "../local-storage-state/use-local-storage-state";
-import LocalStorageKeys from "../local-storage-state/local-storage-keys";
 import useMarkdown from "../../hooks/use-markdown";
-import useEditorFontSize from "./hooks/use-editor-font-size";
+import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useKeyboardShortcut from "../keyboard-shortcuts";
 import shortcuts from "../keyboard-shortcuts/shortcuts";
 import { ShortcutIdentifiers } from "../keyboard-shortcuts/types";
+import LocalStorageKeys from "../local-storage-state/local-storage-keys";
+import useLocalStorageState from "../local-storage-state/use-local-storage-state";
+import NoteManagementContext from "../note-management/contexts/note-management-context";
+import { DEFAULT_NOTE } from "../note-management/note-management-constants";
+import useEditorFontSize from "./hooks/use-editor-font-size";
+import useEditorTools from "./hooks/use-editor-tools";
+import useImageAttachments from "./hooks/use-image-attachments";
+import ToolbarComponent from "./toolbar";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -36,7 +37,9 @@ const useStyles = makeStyles(() =>
 
 const MarkdownEditorComponent = (): JSX.Element => {
   const classes = useStyles();
-  const { currentNote, updateCurrentNote } = useContext(NoteManagementContext);
+  const { currentNote, updateCurrentNote, updateTags } = useContext(
+    NoteManagementContext
+  );
   const [editMode, setEditMode] = useLocalStorageState<boolean>(
     LocalStorageKeys.EditorMode,
     false
@@ -78,14 +81,11 @@ const MarkdownEditorComponent = (): JSX.Element => {
     }
   }, [editMode, editor]);
 
-  const handleOnWindowResize = useCallback(
-    (ev) => {
-      if (editor) {
-        editor.layout();
-      }
-    },
-    [editor]
-  );
+  const handleOnWindowResize = useCallback(() => {
+    if (editor) {
+      editor.layout();
+    }
+  }, [editor]);
 
   useEffect(() => {
     window.addEventListener("resize", handleOnWindowResize);
@@ -98,34 +98,28 @@ const MarkdownEditorComponent = (): JSX.Element => {
       updateCurrentNote({
         markdown: newMarkdown,
         fileDescription: {
-          created:
-            currentNote?.fileDescription.created ??
-            DEFAULT_NOTE.fileDescription.created,
+          created: (currentNote ?? DEFAULT_NOTE).fileDescription.created,
           modified: Date.now(),
           fileExists: currentNote?.fileDescription.fileExists ?? true,
-          fileNameWithoutExtension:
-            currentNote?.fileDescription.fileNameWithoutExtension ??
-            DEFAULT_NOTE.fileDescription.fileNameWithoutExtension,
-          tags:
-            currentNote?.fileDescription.tags ??
-            DEFAULT_NOTE.fileDescription.tags,
-          title:
-            currentNote?.fileDescription.title ??
-            DEFAULT_NOTE.fileDescription.title
+          fileNameWithoutExtension: (currentNote ?? DEFAULT_NOTE)
+            .fileDescription.fileNameWithoutExtension,
+          tags: (currentNote ?? DEFAULT_NOTE).fileDescription.tags,
+          title: (currentNote ?? DEFAULT_NOTE).fileDescription.title
         }
       });
     },
-    [
-      currentNote?.fileDescription.created,
-      currentNote?.fileDescription.fileExists,
-      currentNote?.fileDescription.fileNameWithoutExtension,
-      currentNote?.fileDescription.tags,
-      currentNote?.fileDescription.title,
-      updateCurrentNote
-    ]
+    [currentNote, updateCurrentNote]
   );
 
-  const handleToggleEditMode = useCallback(() => {
+  const handleOnTagsUpdated = useCallback(
+    (newTags: string[] | undefined) => {
+      if (!updateTags) return;
+      updateTags(newTags?.length ? newTags : ["Untagged"]);
+    },
+    [updateTags]
+  );
+
+  const handleOnToggleEditMode = useCallback(() => {
     const updatedEditMode = editMode === undefined ? false : !editMode;
     if (updatedEditMode) {
       setQueueFocus(true);
@@ -137,7 +131,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   useKeyboardShortcut(
     shortcuts[ShortcutIdentifiers.ToggleEditMode],
-    handleToggleEditMode
+    handleOnToggleEditMode
   );
 
   useEffect(() => {
@@ -195,7 +189,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   const applyUpdateCursorPositionHandler = useCallback(() => {
     if (!editor) return;
-    editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition(() => {
       const position = editor.getPosition();
       setCursorPosition(position ?? undefined);
     });
@@ -214,19 +208,29 @@ const MarkdownEditorComponent = (): JSX.Element => {
     };
   }, [monacoContainerRef, handleOnPaste]);
 
-  return editMode ? (
-    <div ref={monacoContainerRef} className={classes.container}>
-      <MonacoEditor
-        theme="vs-dark"
-        language="markdown"
-        value={rawMarkdown}
-        onChange={handleOnChangeEditor}
-        editorDidMount={handleEditorDidMount}
-        options={{ fontSize: editorFontSize }}
+  return (
+    <>
+      <ToolbarComponent
+        editMode={editMode}
+        currentNote={currentNote}
+        onToggleEditMode={handleOnToggleEditMode}
+        onTagsUpdated={handleOnTagsUpdated}
       />
-    </div>
-  ) : (
-    <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
+      {editMode ? (
+        <div ref={monacoContainerRef} className={classes.container}>
+          <MonacoEditor
+            theme="vs-dark"
+            language="markdown"
+            value={rawMarkdown}
+            onChange={handleOnChangeEditor}
+            editorDidMount={handleEditorDidMount}
+            options={{ fontSize: editorFontSize }}
+          />
+        </div>
+      ) : (
+        <VerticalDisplaySection>{renderedMarkdown}</VerticalDisplaySection>
+      )}
+    </>
   );
 };
 
