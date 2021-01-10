@@ -73,10 +73,6 @@ const TagButton = ({
             (tagFromOtherNote) => tagFromOtherNote !== tag
           )}
           onUpdate={(newValue: string) => {
-            console.log(
-              "TagButton received updated tag, changing TagButton state",
-              newValue
-            );
             onTagsUpdated(
               tags?.reduce<string[]>((aggregate, current, currentIndex) => {
                 const shouldReplaceCurrent = currentIndex === index;

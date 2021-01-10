@@ -1,6 +1,4 @@
-import { createStyles, makeStyles, Tooltip } from "@material-ui/core";
-import { Edit } from "@material-ui/icons";
-import { ToggleButton } from "@material-ui/lab";
+import { createStyles, makeStyles } from "@material-ui/core";
 import * as monaco from "monaco-editor";
 import React, {
   createRef,
@@ -26,7 +24,7 @@ import { DEFAULT_NOTE } from "../note-management/note-management-constants";
 import useEditorFontSize from "./hooks/use-editor-font-size";
 import useEditorTools from "./hooks/use-editor-tools";
 import useImageAttachments from "./hooks/use-image-attachments";
-import TagButton from "./tag-button";
+import ToolbarComponent from "./toolbar";
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -121,7 +119,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
     [updateTags]
   );
 
-  const handleToggleEditMode = useCallback(() => {
+  const handleOnToggleEditMode = useCallback(() => {
     const updatedEditMode = editMode === undefined ? false : !editMode;
     if (updatedEditMode) {
       setQueueFocus(true);
@@ -133,7 +131,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   useKeyboardShortcut(
     shortcuts[ShortcutIdentifiers.ToggleEditMode],
-    handleToggleEditMode
+    handleOnToggleEditMode
   );
 
   useEffect(() => {
@@ -212,25 +210,12 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   return (
     <>
-      <div>
-        <Tooltip title="Toggle edit mode" aria-label="toggle edit mode">
-          <ToggleButton
-            size="small"
-            onChange={handleToggleEditMode}
-            selected={editMode ?? false}
-            value
-          >
-            <Edit />
-          </ToggleButton>
-        </Tooltip>
-        <TagButton
-          tags={currentNote?.fileDescription?.tags}
-          fileNameWithoutExtension={
-            currentNote?.fileDescription?.fileNameWithoutExtension
-          }
-          onTagsUpdated={handleOnTagsUpdated}
-        />
-      </div>
+      <ToolbarComponent
+        editMode={editMode}
+        currentNote={currentNote}
+        onToggleEditMode={handleOnToggleEditMode}
+        onTagsUpdated={handleOnTagsUpdated}
+      />
       {editMode ? (
         <div ref={monacoContainerRef} className={classes.container}>
           <MonacoEditor
