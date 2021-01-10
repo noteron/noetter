@@ -1,5 +1,3 @@
-import shortcutMap from "./shortcut-map";
-import useKeyboardShortcuts from "./use-keyboard-shortcuts";
+import useKeyboardShortcut from "./use-keyboard-shortcut";
 
-export default useKeyboardShortcuts;
-export { shortcutMap };
+export default useKeyboardShortcut;

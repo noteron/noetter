@@ -1,70 +1,62 @@
-import { GlobalEventType } from "../events/event-types";
-import { Shortcut } from "./types";
+import { ShortcutMap, ShortcutIdentifiers } from "./types";
 
-const shortcutMap: Shortcut[] = [
-  {
+const shortcuts: ShortcutMap = {
+  [ShortcutIdentifiers.ToggleZenMode]: {
     name: "Window: Toggle zen mode",
     keyCombination: {
       altKey: true,
       ctrlKey: true,
       key: "z"
-    },
-    eventType: GlobalEventType.WindowZenModeShortcutTrigger
+    }
   },
-  {
+  [ShortcutIdentifiers.CreateNewNote]: {
     name: "Note management: Create new note",
     keyCombination: {
       altKey: false,
       ctrlKey: true,
       key: "n"
-    },
-    eventType: GlobalEventType.NoteManagementCreateNewNoteTrigger
+    }
   },
-  {
+  [ShortcutIdentifiers.SaveCurrentNote]: {
     name: "Note Management: Save current note",
     keyCombination: {
       altKey: false,
       ctrlKey: true,
       key: "s"
-    },
-    eventType: GlobalEventType.NoteManagementSaveCurrentNoteTrigger
+    }
   },
-  {
+  [ShortcutIdentifiers.ToggleEditMode]: {
     name: "Editor: Toggle edit mode",
     keyCombination: {
       altKey: false,
       ctrlKey: true,
       key: "e"
-    },
-    eventType: GlobalEventType.EditorToggleEditModeTrigger
+    }
   },
-  {
+  [ShortcutIdentifiers.ToggleCheckbox]: {
     name: "Editor: Make row into checkbox",
     keyCombination: {
       altKey: true,
       ctrlKey: false,
       key: "d"
-    },
-    eventType: GlobalEventType.EditorMakeRowIntoCheckboxTrigger
+    }
   },
-  {
+  [ShortcutIdentifiers.IncreaseFontSize]: {
     name: "Editor: Increase font size",
     keyCombination: {
       altKey: false,
       ctrlKey: true,
       key: "+"
-    },
-    eventType: GlobalEventType.EditorIncreaseFontSize
+    }
   },
-  {
+  [ShortcutIdentifiers.DecreaseFontSize]: {
     name: "Editor: Decrease font size",
     keyCombination: {
       altKey: false,
       ctrlKey: true,
       key: "-"
-    },
-    eventType: GlobalEventType.EditorDecreaseFontSize
+    }
   }
-];
+};
 
-export default shortcutMap;
+export default shortcuts;

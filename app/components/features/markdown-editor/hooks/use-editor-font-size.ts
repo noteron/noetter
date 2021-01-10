@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
-import { useEventListener } from "../../events";
-import { GlobalEventType } from "../../events/event-types";
+import useKeyboardShortcut from "../../keyboard-shortcuts";
+import shortcuts from "../../keyboard-shortcuts/shortcuts";
+import { ShortcutIdentifiers } from "../../keyboard-shortcuts/types";
 import LocalStorageKeys from "../../local-storage-state/local-storage-keys";
 import useLocalStorageState from "../../local-storage-state/use-local-storage-state";
 
@@ -22,7 +23,11 @@ const useEditorFontSize = (): number => {
     () => setFontSize(currentSizeOrDefault + INCREASE_DECREASE_STEP_SIZE),
     [currentSizeOrDefault, setFontSize]
   );
-  useEventListener(GlobalEventType.EditorIncreaseFontSize, increaseFontSize);
+
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.IncreaseFontSize],
+    increaseFontSize
+  );
 
   const decreaseFontSize = useCallback(
     () =>
@@ -33,7 +38,11 @@ const useEditorFontSize = (): number => {
       ),
     [currentSizeOrDefault, setFontSize]
   );
-  useEventListener(GlobalEventType.EditorDecreaseFontSize, decreaseFontSize);
+
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.DecreaseFontSize],
+    decreaseFontSize
+  );
 
   return currentSizeOrDefault;
 };

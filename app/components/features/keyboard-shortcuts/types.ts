@@ -1,5 +1,3 @@
-import { GlobalEventType } from "../events/event-types";
-
 export type KeyCombination = {
   ctrlKey: boolean;
   altKey: boolean;
@@ -9,5 +7,18 @@ export type KeyCombination = {
 export type Shortcut = {
   name: string;
   keyCombination: KeyCombination;
-  eventType: GlobalEventType;
+};
+
+export enum ShortcutIdentifiers {
+  ToggleEditMode = "ToggleEditMode",
+  ToggleCheckbox = "ToggleCheckbox",
+  IncreaseFontSize = "IncreaseFontSize",
+  DecreaseFontSize = "DecreaseFontSize",
+  CreateNewNote = "CreateNewNote",
+  SaveCurrentNote = "SaveCurrentNote",
+  ToggleZenMode = "ToggleZenMode"
+}
+
+export type ShortcutMap = {
+  [K in ShortcutIdentifiers]: Shortcut;
 };

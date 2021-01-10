@@ -1,22 +1,19 @@
 import { useCallback, useState } from "react";
-import { useOutsideContextEventListener } from "../features/events";
-import {
-  EventContextState,
-  GlobalEventType
-} from "../features/events/event-types";
+import useKeyboardShortcut from "../features/keyboard-shortcuts";
+import shortcuts from "../features/keyboard-shortcuts/shortcuts";
+import { ShortcutIdentifiers } from "../features/keyboard-shortcuts/types";
 
-const useZenMode = (events: EventContextState): boolean => {
+const useZenMode = (): boolean => {
   const [zenMode, setZenMode] = useState<boolean>(false);
 
-  const toggleZenMode = useCallback(
-    () => setZenMode((prev: boolean) => !prev),
-    []
-  );
+  const toggleZenMode = useCallback(() => {
+    setZenMode((prev: boolean) => !prev);
+    window.dispatchEvent(new Event("resize"));
+  }, []);
 
-  useOutsideContextEventListener(
-    GlobalEventType.WindowZenModeShortcutTrigger,
-    toggleZenMode,
-    events
+  useKeyboardShortcut(
+    shortcuts[ShortcutIdentifiers.ToggleZenMode],
+    toggleZenMode
   );
 
   return zenMode;
