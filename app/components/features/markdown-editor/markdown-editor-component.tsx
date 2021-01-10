@@ -11,13 +11,8 @@ import MonacoEditor, {
   EditorDidMount
 } from "react-monaco-editor";
 import * as monaco from "monaco-editor";
-import {
-  makeStyles,
-  createStyles,
-  IconButton,
-  Tooltip
-} from "@material-ui/core";
-import { Edit, Label } from "@material-ui/icons";
+import { makeStyles, createStyles, Tooltip } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import { ToggleButton } from "@material-ui/lab";
 import VerticalDisplaySection from "../../layout/vertical-display-section";
 import useEditorTools from "./hooks/use-editor-tools";
@@ -87,14 +82,11 @@ const MarkdownEditorComponent = (): JSX.Element => {
     }
   }, [editMode]);
 
-  const handleOnWindowResize = useCallback(
-    (ev) => {
-      if (editor) {
-        editor.layout();
-      }
-    },
-    [editor]
-  );
+  const handleOnWindowResize = useCallback(() => {
+    if (editor) {
+      editor.layout();
+    }
+  }, [editor]);
 
   useEffect(() => {
     window.addEventListener("resize", handleOnWindowResize);
@@ -109,35 +101,23 @@ const MarkdownEditorComponent = (): JSX.Element => {
       updateCurrentNote({
         markdown: newMarkdown,
         fileDescription: {
-          created:
-            currentNote?.fileDescription.created ??
-            DEFAULT_NOTE.fileDescription.created,
+          created: (currentNote ?? DEFAULT_NOTE).fileDescription.created,
           modified: Date.now(),
           fileExists: currentNote?.fileDescription.fileExists ?? true,
-          fileNameWithoutExtension:
-            currentNote?.fileDescription.fileNameWithoutExtension ??
-            DEFAULT_NOTE.fileDescription.fileNameWithoutExtension,
-          tags:
-            currentNote?.fileDescription.tags ??
-            DEFAULT_NOTE.fileDescription.tags,
-          title:
-            currentNote?.fileDescription.title ??
-            DEFAULT_NOTE.fileDescription.title
+          fileNameWithoutExtension: (currentNote ?? DEFAULT_NOTE)
+            .fileDescription.fileNameWithoutExtension,
+          tags: (currentNote ?? DEFAULT_NOTE).fileDescription.tags,
+          title: (currentNote ?? DEFAULT_NOTE).fileDescription.title
         }
       });
     },
-    [
-      currentNote?.fileDescription.created,
-      currentNote?.fileDescription.fileExists,
-      currentNote?.fileDescription.fileNameWithoutExtension,
-      currentNote?.fileDescription.tags,
-      currentNote?.fileDescription.title,
-      updateCurrentNote
-    ]
+    [currentNote, updateCurrentNote]
   );
 
   const handleOnTagsUpdated = useCallback(
     (newTags: string[] | undefined) => {
+      console.log("handleOnTagsUpdated. Take newTags and save on file");
+      console.log(newTags);
       if (!updateTags) return;
       updateTags(newTags ?? []);
     },
@@ -208,7 +188,7 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   const applyUpdateCursorPositionHandler = useCallback(() => {
     if (!editor) return;
-    editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition(() => {
       const position = editor.getPosition();
       setCursorPosition(position ?? undefined);
     });
@@ -235,12 +215,16 @@ const MarkdownEditorComponent = (): JSX.Element => {
             size="small"
             onChange={handleToggleEditMode}
             selected={editMode ?? false}
+            value
           >
             <Edit />
           </ToggleButton>
         </Tooltip>
         <TagButton
           tags={currentNote?.fileDescription?.tags}
+          fileNameWithoutExtension={
+            currentNote?.fileDescription?.fileNameWithoutExtension
+          }
           onTagsUpdated={handleOnTagsUpdated}
         />
       </div>
