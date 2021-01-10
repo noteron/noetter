@@ -98,9 +98,6 @@ const TagButton = ({
           <Label />
         </IconButton>
       </Tooltip>
-      {tags?.map((t) => (
-        <TextField value={t} key={t} disabled />
-      ))}
       <Popper open={open} anchorEl={anchorRef.current} transition>
         {({ TransitionProps, placement }) => (
           <Grow
