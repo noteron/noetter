@@ -116,8 +116,6 @@ const MarkdownEditorComponent = (): JSX.Element => {
 
   const handleOnTagsUpdated = useCallback(
     (newTags: string[] | undefined) => {
-      console.log("handleOnTagsUpdated. Take newTags and save on file");
-      console.log(newTags);
       if (!updateTags) return;
       updateTags(newTags?.length ? newTags : ["Untagged"]);
     },
