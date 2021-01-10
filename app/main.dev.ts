@@ -11,6 +11,7 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import path from "path";
+import os from "os";
 import { app, BrowserWindow } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log";
@@ -98,6 +99,14 @@ const createWindow = async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  // TODO: Implement support for linux as well
+  BrowserWindow.addDevToolsExtension(
+    path.join(
+      os.homedir(),
+      "AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\fmkadmapgofadopljbjfkapdkoienihi\\4.10.1_0"
+    )
+  );
 };
 
 /**
