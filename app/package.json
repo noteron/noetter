@@ -1,11 +1,11 @@
 {
-  "name": "notes",
-  "productName": "notes",
+  "name": "notter",
+  "productName": "Nötter",
   "version": "1.0.0",
-  "description": "A markdown note taking application running electron and react",
+  "description": "An open source note taking application",
   "main": "./main.prod.js",
   "author": {
-    "name": "Note People Maintainers",
+    "name": "Nötter Maintainers",
     "email": "noemail@pucko.fail",
     "url": "https://notes.pucko.fail"
   },
