@@ -1,13 +1,13 @@
 {
-  "name": "notter",
-  "productName": "Nötter",
+  "name": "noetter",
+  "productName": "noetter",
   "version": "1.0.0",
   "description": "An open source note taking application",
   "main": "./main.prod.js",
   "author": {
-    "name": "Nötter Maintainers",
+    "name": "Noetter Maintainers",
     "email": "noemail@pucko.fail",
-    "url": "https://notes.pucko.fail"
+    "url": "https://github.com/noteron/noteron"
   },
   "scripts": {
     "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
