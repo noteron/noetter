@@ -9,9 +9,9 @@ type FilePathContextState = {
 };
 
 const FilePathContext = createContext<FilePathContextState>({
-  rootFolderPath: path.normalize(`${os.homedir()}/.notes`),
-  notesFolderPath: path.normalize(`${os.homedir()}/.notes/notes`),
-  attachmentsFolderPath: path.normalize(`${os.homedir()}/.notes/attachments`)
+  rootFolderPath: path.normalize(`${os.homedir()}/.noetter`),
+  notesFolderPath: path.normalize(`${os.homedir()}/.noetter/notes`),
+  attachmentsFolderPath: path.normalize(`${os.homedir()}/.noetter/attachments`)
 });
 
 export default FilePathContext;

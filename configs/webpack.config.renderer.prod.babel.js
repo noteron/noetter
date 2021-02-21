@@ -13,6 +13,8 @@ import baseConfig from "./webpack.config.base";
 import CheckNodeEnv from "../internals/scripts/CheckNodeEnv";
 import DeleteSourceMaps from "../internals/scripts/DeleteSourceMaps";
 
+const MONACO_DIR = path.resolve(__dirname, "../node_modules/monaco-editor");
+
 CheckNodeEnv("production");
 DeleteSourceMaps();
 
@@ -37,9 +39,15 @@ export default merge(baseConfig, {
 
   module: {
     rules: [
+      {
+        test: /\.css$/,
+        include: MONACO_DIR,
+        use: ["style-loader", "css-loader"]
+      },
       // Extract all .global.css to style.css as is
       {
         test: /\.global\.css$/,
+        exclude: MONACO_DIR,
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
@@ -58,6 +66,7 @@ export default merge(baseConfig, {
       // Pipe other styles through css modules and append to style.css
       {
         test: /^((?!\.global).)*\.css$/,
+        exclude: MONACO_DIR,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
@@ -127,7 +136,8 @@ export default merge(baseConfig, {
           loader: "url-loader",
           options: {
             limit: 10000,
-            mimetype: "application/font-woff"
+            mimetype: "application/font-woff",
+            publicPath: "./"
           }
         }
       },
@@ -138,7 +148,8 @@ export default merge(baseConfig, {
           loader: "url-loader",
           options: {
             limit: 10000,
-            mimetype: "application/font-woff"
+            mimetype: "application/font-woff",
+            publicPath: "./"
           }
         }
       },

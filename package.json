@@ -1,8 +1,8 @@
 {
-  "name": "notes",
-  "productName": "notes",
+  "name": "noetter",
+  "productName": "noetter",
   "version": "1.0.0",
-  "description": "A markdown note taking application running electron and react",
+  "description": "An open source note taking application",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -52,8 +52,8 @@
     ]
   },
   "build": {
-    "productName": "notes",
-    "appId": "fail.pucko.notes",
+    "productName": "noetter",
+    "appId": "noetter.appid",
     "files": [
       "dist/",
       "node_modules/",
@@ -99,7 +99,7 @@
     "url": "git+https://gitlab.pucko.fail/electron-people/notes.git"
   },
   "author": {
-    "name": "Note People Maintainers",
+    "name": "Noetter Maintainers",
     "email": "noemail@pucko.fail",
     "url": "https://notes.pucko.fail"
   },
@@ -110,14 +110,14 @@
       "url": "http://montell.se"
     },
     {
-      "name": "Linus Törngren",
+      "name": "Christoffer Olsson",
       "email": "addemailhereif@you.want",
       "url": "https://addresshereif.you/want"
     }
   ],
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://gitlab.pucko.fail/electron-people/notes/-/issues"
+    "url": "https://github.com/noteron/noteron"
   },
   "keywords": [
     "electron",
@@ -126,7 +126,7 @@
     "typescript",
     "notes"
   ],
-  "homepage": "https://gitlab.pucko.fail/electron-people/notes/-/tree/master",
+  "homepage": "https://github.com/noteron/noteron",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
