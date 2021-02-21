@@ -1,8 +1,8 @@
 {
-  "name": "notes",
-  "productName": "notes",
+  "name": "Nötter",
+  "productName": "Nötter",
   "version": "1.0.0",
-  "description": "A markdown note taking application running electron and react",
+  "description": "An open source note taking application",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",

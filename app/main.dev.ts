@@ -71,7 +71,6 @@ const createWindow = async () => {
   }
 
   mainWindow = new BrowserWindow({
-    icon: path.join(__dirname, "/icons/512x512.png"),
     show: false,
     width: 1920,
     height: 1080,
