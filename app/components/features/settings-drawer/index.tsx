@@ -82,6 +82,7 @@ const SettingsDrawer = ({ settings }: Props): JSX.Element => {
         Settings
       </Typography>
       <TextField
+        disabled
         required
         label="Root folder"
         value={rootPathState}
