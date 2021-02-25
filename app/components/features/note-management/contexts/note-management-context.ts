@@ -11,6 +11,7 @@ export type NoteManagementContextState = {
   createNewNote?: () => void;
   saveNote?: () => Promise<void>;
   allAvailableNotes?: FileDescription[];
+  deleteCurrentNote?: () => Promise<void>;
 };
 
 const NoteManagementContext = createContext<NoteManagementContextState>({});

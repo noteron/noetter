@@ -8,8 +8,9 @@ import {
 } from "@material-ui/core";
 import { DeleteForever, Edit } from "@material-ui/icons";
 import { ToggleButton } from "@material-ui/lab";
-import React from "react";
+import React, { useCallback, useContext } from "react";
 import { BackgroundColor } from "../../../../colors";
+import { NoteManagementContext } from "../../note-management";
 import { CurrentNote } from "../../note-management/note-management-types";
 import useTagButton from "../tag-button/use-tag-button";
 
@@ -55,6 +56,13 @@ const ToolbarComponent = ({
     onTagsUpdated,
     currentNote?.fileDescription?.fileNameWithoutExtension
   );
+  const { deleteCurrentNote } = useContext(NoteManagementContext);
+
+  const handleOnDelete = useCallback(
+    () => deleteCurrentNote?.().then(() => {}),
+    [deleteCurrentNote]
+  );
+
   return (
     <div className={classes.root}>
       <div className={classes.buttonGroupsContainer}>
@@ -72,8 +80,8 @@ const ToolbarComponent = ({
           {tagButtonElements}
         </ButtonGroup>
         <ButtonGroup color="secondary" className={classes.buttonGroup}>
-          <Tooltip title="Delete" aria-label="tags">
-            <Button size="small">
+          <Tooltip title="Delete forever" aria-label="tags">
+            <Button size="small" onClick={handleOnDelete}>
               <DeleteForever />
             </Button>
           </Tooltip>

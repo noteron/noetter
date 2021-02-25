@@ -14,6 +14,7 @@ type UseFileWriterProps = {
     suggestedFileNameWithoutExtension: string,
     oldFileNameWithoutExtension?: string
   ) => Promise<string>;
+  deleteFile: (fileNameWithoutExtension: string) => Promise<void>;
 };
 
 const useFileWriter = (): UseFileWriterProps => {
@@ -93,9 +94,25 @@ const useFileWriter = (): UseFileWriterProps => {
     [getFreeFileName, notesFolderPath]
   );
 
+  const deleteFile = useCallback(
+    async (fileNameWithoutExtension: string): Promise<void> =>
+      new Promise<void>((resolve) => {
+        const absolutePath = path.normalize(
+          `${notesFolderPath}/${getFileNameWithExtension(
+            fileNameWithoutExtension
+          )}`
+        );
+        fs.unlink(absolutePath, () => {
+          resolve();
+        });
+      }),
+    [notesFolderPath]
+  );
+
   return {
     saveNewFile,
-    saveExistingFile
+    saveExistingFile,
+    deleteFile
   };
 };
 
