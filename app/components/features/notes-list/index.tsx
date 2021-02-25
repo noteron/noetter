@@ -1,10 +1,46 @@
 import React, { useMemo, useContext } from "react";
-import { List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  createStyles,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  makeStyles,
+  Theme
+} from "@material-ui/core";
 import { Note } from "@material-ui/icons";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
 import { FileDescription } from "../note-management/note-management-types";
+import { BackgroundColor } from "../../../colors";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      backgroundColor: theme.palette.background.paper,
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      borderWidth: "0 1px 0 1px",
+      borderStyle: "solid",
+      borderColor: "black"
+    },
+    notesList: {
+      overflowY: "auto",
+      flex: 1,
+      overflowX: "hidden",
+      backgroundColor: BackgroundColor.notesList
+    },
+    title: {
+      backgroundColor: BackgroundColor.toolbar,
+      borderWidth: "0 0 1px 0",
+      borderStyle: "solid",
+      borderColor: "black"
+    }
+  })
+);
 
 const NotesList = (): JSX.Element => {
+  const classes = useStyles();
   const { openNote, allAvailableNotes, currentNote, selectedTags } = useContext(
     NoteManagementContext
   );
@@ -59,15 +95,19 @@ const NotesList = (): JSX.Element => {
   );
 
   return (
-    <List>
-      <ListItem dense>
-        <ListItemIcon>
-          <Note />
-        </ListItemIcon>
-        <ListItemText primary={`Notes (${numberOfFiles})`} />
-      </ListItem>
-      {memoizedFileList}
-    </List>
+    <div className={classes.root}>
+      <List disablePadding className={classes.title}>
+        <ListItem>
+          <ListItemIcon>
+            <Note />
+          </ListItemIcon>
+          <ListItemText primary={`Notes (${numberOfFiles})`} />
+        </ListItem>
+      </List>
+      <List dense disablePadding className={classes.notesList}>
+        {memoizedFileList}
+      </List>
+    </div>
   );
 };
 

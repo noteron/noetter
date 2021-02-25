@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { Paper, makeStyles, createStyles } from "@material-ui/core";
+import { BackgroundColor } from "../../colors";
 
 type Props = {
   children: ReactNode | undefined;
@@ -13,7 +14,8 @@ const useStyles = makeStyles(() =>
       height: "100vh",
       wordWrap: "break-word",
       overflowWrap: "break-word",
-      overflowY: "auto"
+      overflowY: "auto",
+      backgroundColor: BackgroundColor.editor
     }
   })
 );
@@ -21,7 +23,7 @@ const useStyles = makeStyles(() =>
 const VerticalDisplaySection = ({ children }: Props): JSX.Element => {
   const classes = useStyles();
   return (
-    <Paper variant="outlined" square className={classes.paper}>
+    <Paper square className={classes.paper}>
       {children}
     </Paper>
   );
