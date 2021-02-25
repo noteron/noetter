@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: "column",
       borderWidth: "0 1px 0 1px",
       borderStyle: "solid",
-      borderColor: "black"
+      borderColor: BackgroundColor.border
     },
     notesList: {
       overflowY: "auto",
@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: BackgroundColor.toolbar,
       borderWidth: "0 0 1px 0",
       borderStyle: "solid",
-      borderColor: "black"
+      borderColor: BackgroundColor.border
     }
   })
 );
