@@ -18,7 +18,7 @@ import { ShortcutIdentifiers } from "../keyboard-shortcuts/types";
 
 const useNoteManagement = (): NoteManagementContextState => {
   const { getFileDescriptions, readFileAsync } = useFileReader();
-  const { saveExistingFile, saveNewFile } = useFileWriter();
+  const { saveExistingFile, saveNewFile, deleteFile } = useFileWriter();
   const [currentNote, setCurrentNote] = useState<CurrentNote>(DEFAULT_NOTE);
   const [fileList, setFileList] = useState<FileDescription[]>();
   const [selectedTags, setSelectedTags] = useState<string[]>();
@@ -155,6 +155,33 @@ const useNoteManagement = (): NoteManagementContextState => {
     }));
   }, []);
 
+  const deleteCurrentNote = useCallback(async (): Promise<void> => {
+    const selectedTag = selectedTags?.[0] ?? "Untagged";
+    await deleteFile(currentNote.fileDescription.fileNameWithoutExtension);
+    setLastOpenFile(undefined);
+    await refreshFileList();
+    const matchInSameTag = fileList?.find(
+      (file) =>
+        file.tags.includes(selectedTag) &&
+        file.fileNameWithoutExtension !==
+          currentNote.fileDescription.fileNameWithoutExtension
+    );
+    if (matchInSameTag) {
+      await openNote(matchInSameTag);
+      return;
+    }
+    await createNewNote();
+  }, [
+    createNewNote,
+    currentNote.fileDescription.fileNameWithoutExtension,
+    deleteFile,
+    fileList,
+    openNote,
+    refreshFileList,
+    selectedTags,
+    setLastOpenFile
+  ]);
+
   const saveNoteEventTriggerHandler = useCallback(() => {
     saveNote()
       .then(() => undefined)
@@ -186,7 +213,8 @@ const useNoteManagement = (): NoteManagementContextState => {
     openNote,
     selectedTags,
     selectTags,
-    createNewNote
+    createNewNote,
+    deleteCurrentNote
   };
 };
 
