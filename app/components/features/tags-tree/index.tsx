@@ -10,6 +10,7 @@ import {
 } from "@material-ui/core";
 import { Label, Settings } from "@material-ui/icons";
 import NoteManagementContext from "../note-management/contexts/note-management-context";
+import { BackgroundColor } from "../../../colors";
 
 type Props = {
   onSettingsClick: () => void;
@@ -38,6 +39,24 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     nested: {
       paddingLeft: theme.spacing(4)
+    },
+    tagsTree: {
+      overflowY: "auto",
+      flex: 1,
+      overflowX: "hidden",
+      backgroundColor: BackgroundColor.tagTree
+    },
+    header: {
+      backgroundColor: BackgroundColor.toolbar,
+      borderWidth: "0 0 1px 0",
+      borderStyle: "solid",
+      borderColor: BackgroundColor.border
+    },
+    footer: {
+      backgroundColor: BackgroundColor.toolbar,
+      borderWidth: "1px 0 0 0",
+      borderStyle: "solid",
+      borderColor: BackgroundColor.border
     }
   })
 );
@@ -164,16 +183,18 @@ const TagsTree = ({ onSettingsClick }: Props): JSX.Element => {
 
   return (
     <div className={classes.root}>
-      <List dense style={{ flex: "1" }}>
+      <List disablePadding className={classes.header}>
         <ListItem>
           <ListItemIcon>
             <Label />
           </ListItemIcon>
           <ListItemText primary="Tags" />
         </ListItem>
+      </List>
+      <List disablePadding dense className={classes.tagsTree}>
         {memoizedTagsList}
       </List>
-      <List>
+      <List disablePadding className={classes.footer}>
         <ListItem button onClick={onSettingsClick}>
           <ListItemIcon>
             <Settings />
