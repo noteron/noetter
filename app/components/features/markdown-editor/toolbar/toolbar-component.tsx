@@ -1,10 +1,17 @@
-import { createStyles, makeStyles, Theme, Tooltip } from "@material-ui/core";
-import { Edit } from "@material-ui/icons";
+import {
+  Button,
+  ButtonGroup,
+  createStyles,
+  makeStyles,
+  Theme,
+  Tooltip
+} from "@material-ui/core";
+import { DeleteForever, Edit } from "@material-ui/icons";
 import { ToggleButton } from "@material-ui/lab";
 import React from "react";
 import { BackgroundColor } from "../../../../colors";
 import { CurrentNote } from "../../note-management/note-management-types";
-import TagButton from "../tag-button";
+import useTagButton from "../tag-button/use-tag-button";
 
 type Props = {
   editMode: boolean | undefined;
@@ -20,11 +27,22 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: BackgroundColor.toolbar,
       borderWidth: "0 0 1px 0",
       borderStyle: "solid",
-      borderColor: BackgroundColor.border
+      borderColor: BackgroundColor.border,
+      flexDirection: "column",
+      display: "flex",
+      justifyContent: "center"
+    },
+    buttonGroupsContainer: {
+      marginLeft: theme.spacing(2),
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "flex-start"
+    },
+    buttonGroup: {
+      marginRight: theme.spacing(3)
     }
   })
 );
-
 const ToolbarComponent = ({
   editMode,
   currentNote,
@@ -32,25 +50,35 @@ const ToolbarComponent = ({
   onTagsUpdated
 }: Props): JSX.Element => {
   const classes = useStyles();
+  const tagButtonElements = useTagButton(
+    currentNote?.fileDescription?.tags,
+    onTagsUpdated,
+    currentNote?.fileDescription?.fileNameWithoutExtension
+  );
   return (
     <div className={classes.root}>
-      <Tooltip title="Toggle edit mode" aria-label="toggle edit mode">
-        <ToggleButton
-          size="small"
-          onChange={onToggleEditMode}
-          selected={editMode ?? false}
-          value
-        >
-          <Edit />
-        </ToggleButton>
-      </Tooltip>
-      <TagButton
-        tags={currentNote?.fileDescription?.tags}
-        fileNameWithoutExtension={
-          currentNote?.fileDescription?.fileNameWithoutExtension
-        }
-        onTagsUpdated={onTagsUpdated}
-      />
+      <div className={classes.buttonGroupsContainer}>
+        <ButtonGroup className={classes.buttonGroup}>
+          <Tooltip title="Toggle edit mode" aria-label="toggle edit mode">
+            <ToggleButton
+              size="small"
+              onChange={onToggleEditMode}
+              selected={editMode ?? false}
+              value
+            >
+              <Edit />
+            </ToggleButton>
+          </Tooltip>
+          {tagButtonElements}
+        </ButtonGroup>
+        <ButtonGroup color="secondary" className={classes.buttonGroup}>
+          <Tooltip title="Delete" aria-label="tags">
+            <Button size="small">
+              <DeleteForever />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
+      </div>
     </div>
   );
 };

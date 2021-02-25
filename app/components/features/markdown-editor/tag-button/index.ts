@@ -1,3 +1,3 @@
-import TagButton from "./tag-button-component";
+import useTagButton from "./use-tag-button";
 
-export default TagButton;
+export default useTagButton;

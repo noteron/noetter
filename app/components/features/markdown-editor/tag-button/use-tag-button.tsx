@@ -1,10 +1,9 @@
 import {
+  Button,
   ClickAwayListener,
   Grow,
-  IconButton,
   Paper,
   Popper,
-  TextField,
   Tooltip
 } from "@material-ui/core";
 import { Label } from "@material-ui/icons";
@@ -18,17 +17,11 @@ import React, {
 import { NoteManagementContext } from "../../note-management";
 import TagInput from "./tag-input";
 
-type Props = {
-  tags: string[] | undefined;
-  onTagsUpdated: (newTags: string[] | undefined) => void;
-  fileNameWithoutExtension: string | undefined;
-};
-
-const TagButton = ({
-  tags,
-  onTagsUpdated,
-  fileNameWithoutExtension
-}: Props): JSX.Element => {
+const useTagButton = (
+  tags: string[] | undefined,
+  onTagsUpdated: (newTags: string[] | undefined) => void,
+  fileNameWithoutExtension: string | undefined
+): JSX.Element[] => {
   const { allAvailableNotes } = useContext(NoteManagementContext);
 
   const anchorRef = React.useRef<HTMLButtonElement>(null);
@@ -91,33 +84,35 @@ const TagButton = ({
     [onTagsUpdated, tags, usedTagsFromOtherNotes]
   );
 
-  return (
-    <>
-      <Tooltip title="Tags" aria-label="tags">
-        <IconButton size="small" onClick={handleOnClickLabel} ref={anchorRef}>
-          <Label />
-        </IconButton>
-      </Tooltip>
-      <Popper open={open} anchorEl={anchorRef.current} transition>
-        {({ TransitionProps, placement }) => (
-          <Grow
-            // eslint-disable-next-line react/jsx-props-no-spreading
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === "bottom" ? "center top" : "center bottom"
-            }}
-          >
-            <Paper style={{ width: 300 }}>
-              <ClickAwayListener onClickAway={handleClose}>
-                <div>{memoizedTags}</div>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
-    </>
-  );
+  return [
+    <Tooltip title="Tags" aria-label="tags" key="tag-button-tooltip">
+      <Button size="small" onClick={handleOnClickLabel} ref={anchorRef}>
+        <Label />
+      </Button>
+    </Tooltip>,
+    <Popper
+      open={open}
+      anchorEl={anchorRef.current}
+      transition
+      key="tag-button-popper"
+    >
+      {({ TransitionProps, placement }) => (
+        <Grow
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...TransitionProps}
+          style={{
+            transformOrigin:
+              placement === "bottom" ? "center top" : "center bottom"
+          }}
+        >
+          <Paper style={{ width: 300 }}>
+            <ClickAwayListener onClickAway={handleClose}>
+              <div>{memoizedTags}</div>
+            </ClickAwayListener>
+          </Paper>
+        </Grow>
+      )}
+    </Popper>
+  ];
 };
-
-export default TagButton;
+export default useTagButton;
