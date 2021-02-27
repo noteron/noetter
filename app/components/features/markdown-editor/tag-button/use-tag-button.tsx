@@ -1,7 +1,9 @@
 import {
   Button,
   ClickAwayListener,
+  createStyles,
   Grow,
+  makeStyles,
   Paper,
   Popper,
   Tooltip
@@ -14,14 +16,31 @@ import React, {
   useMemo,
   useState
 } from "react";
+import { BackgroundColor } from "../../../../colors";
 import { NoteManagementContext } from "../../note-management";
 import TagInput from "./tag-input";
+
+const useStyles = makeStyles(() =>
+  createStyles({
+    tagEditorContainer: {
+      padding: 0,
+      backgroundColor: BackgroundColor.popup,
+      borderWidth: "1px 1px 1px 1px",
+      borderColor: BackgroundColor.border,
+      borderStyle: "solid",
+      borderRadius: 0,
+      width: 500
+    }
+  })
+);
 
 const useTagButton = (
   tags: string[] | undefined,
   onTagsUpdated: (newTags: string[] | undefined) => void,
   fileNameWithoutExtension: string | undefined
 ): JSX.Element[] => {
+  const classes = useStyles();
+
   const { allAvailableNotes } = useContext(NoteManagementContext);
 
   const anchorRef = React.useRef<HTMLButtonElement>(null);
@@ -105,7 +124,7 @@ const useTagButton = (
               placement === "bottom" ? "center top" : "center bottom"
           }}
         >
-          <Paper style={{ width: 300 }}>
+          <Paper className={classes.tagEditorContainer}>
             <ClickAwayListener onClickAway={handleClose}>
               <div>{memoizedTags}</div>
             </ClickAwayListener>
