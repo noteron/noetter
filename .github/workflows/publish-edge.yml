@@ -1,0 +1,47 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Publish - Edge
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [master]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  snap-package:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Tool - Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install Tool - Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+        with:
+          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN_EDGE }}
+
+      - name: Install Dependencies
+        run: |
+          npm install -g yarn
+          yarn
+
+      - name: Package Snap
+        run: yarn package-snap
+
+      - name: Get Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+
+      - name: Publish Snap
+        run: snapcraft upload --release edge release/noetter_${{ steps.package-version.outputs.current-version}}_amd64.snap
