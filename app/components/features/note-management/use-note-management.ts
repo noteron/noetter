@@ -183,9 +183,7 @@ const useNoteManagement = (): NoteManagementContextState => {
   ]);
 
   const saveNoteEventTriggerHandler = useCallback(() => {
-    saveNote()
-      .then(() => undefined)
-      .catch(() => {});
+    saveNote().then(undefined).catch(undefined);
   }, [saveNote]);
 
   useKeyboardShortcut(
