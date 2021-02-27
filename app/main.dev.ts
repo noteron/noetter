@@ -102,6 +102,19 @@ const createWindow = async () => {
     }
   });
 
+  mainWindow.on("close", (e) => {
+    if (!mainWindow) return;
+    const choice = require("electron").dialog.showMessageBoxSync(mainWindow, {
+      type: "question",
+      buttons: ["Yes", "No"],
+      title: "Confirm",
+      message: "Are you sure you want to quit?"
+    });
+    if (choice === 1) {
+      e.preventDefault();
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
