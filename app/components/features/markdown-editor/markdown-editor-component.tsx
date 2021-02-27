@@ -37,7 +37,7 @@ const useStyles = makeStyles(() =>
 
 const MarkdownEditorComponent = (): JSX.Element => {
   const classes = useStyles();
-  const { currentNote, updateCurrentNote, updateTags } = useContext(
+  const { currentNote, updateCurrentNote, updateTags, saveNote } = useContext(
     NoteManagementContext
   );
   const [editMode, setEditMode] = useLocalStorageState<boolean>(
@@ -199,6 +199,10 @@ const MarkdownEditorComponent = (): JSX.Element => {
     applyUpdateCursorPositionHandler
   ]);
 
+  const handleOnFocusEvent = useCallback(() => saveNote?.().then(undefined), [
+    saveNote
+  ]);
+
   useEffect(() => {
     const { current } = monacoContainerRef;
     if (!current) return undefined;
@@ -207,6 +211,11 @@ const MarkdownEditorComponent = (): JSX.Element => {
       current.removeEventListener("paste", handleOnPaste);
     };
   }, [monacoContainerRef, handleOnPaste]);
+
+  useEffect(() => {
+    const reference = editor?.onDidBlurEditorText(handleOnFocusEvent);
+    return () => reference?.dispose();
+  }, [editor, handleOnFocusEvent]);
 
   return (
     <>
