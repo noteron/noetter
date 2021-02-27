@@ -148,12 +148,19 @@ const useNoteManagement = (): NoteManagementContextState => {
     []
   );
 
-  const updateTags = useCallback((newTags: string[]) => {
-    setCurrentNote((prev) => ({
-      ...prev,
-      fileDescription: { ...prev.fileDescription, tags: newTags }
-    }));
-  }, []);
+  const updateTags = useCallback(
+    (newTags: string[]) => {
+      setCurrentNote((prev) => {
+        const updatedNote = {
+          ...prev,
+          fileDescription: { ...prev.fileDescription, tags: newTags }
+        };
+        handleSaveExistingNote(updatedNote).then(undefined).catch(undefined);
+        return updatedNote;
+      });
+    },
+    [handleSaveExistingNote]
+  );
 
   const deleteCurrentNote = useCallback(async (): Promise<void> => {
     const selectedTag = selectedTags?.[0] ?? "Untagged";
