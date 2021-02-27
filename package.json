@@ -1,6 +1,6 @@
 {
   "name": "noetter",
-  "productName": "noetter",
+  "productName": "Noetter",
   "version": "0.1.0",
   "description": "An open source note taking application",
   "scripts": {
@@ -86,7 +86,8 @@
     "linux": {
       "target": [
         "deb",
-        "AppImage"
+        "AppImage",
+        "snap"
       ],
       "category": "Development"
     },
@@ -97,28 +98,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.pucko.fail/electron-people/notes.git"
+    "url": "git+https://github.com/noteron/noetter"
   },
   "author": {
-    "name": "Noetter Maintainers",
+    "name": "Team Pucko",
     "email": "noemail@pucko.fail",
-    "url": "https://notes.pucko.fail"
+    "url": "https://github.com/noteron"
   },
   "contributors": [
     {
       "name": "Zackarias Montell",
       "email": "zackarias@montell.se",
-      "url": "http://montell.se"
+      "url": "https://github.com/Wholteza"
     },
     {
-      "name": "Christoffer Olsson",
-      "email": "addemailhereif@you.want",
-      "url": "https://addresshereif.you/want"
+      "name": "Christoffer Olsson"
     }
   ],
-  "license": "UNLICENSED",
+  "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/noteron/noteron"
+    "url": "https://github.com/noteron/noetter/issues"
   },
   "keywords": [
     "electron",
@@ -127,7 +126,7 @@
     "typescript",
     "notes"
   ],
-  "homepage": "https://github.com/noteron/noteron",
+  "homepage": "https://github.com/noteron/noetter",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
@@ -188,7 +187,6 @@
     "@types/react-router": "^5.1.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-test-renderer": "^16.9.2",
-    "@types/redux-logger": "^3.0.8",
     "@types/webpack": "^4.41.21",
     "@types/webpack-env": "^1.15.2",
     "@typescript-eslint/eslint-plugin": "^3.6.1",
@@ -238,7 +236,6 @@
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "prettier": "^2.0.5",
     "react-test-renderer": "^16.12.0",
-    "redux-logger": "^3.0.6",
     "rimraf": "^3.0.0",
     "sass-loader": "^9.0.2",
     "style-loader": "^1.2.1",
@@ -278,8 +275,6 @@
     "react-monaco-editor": "^0.41.2",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.2.0",
-    "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.5",
     "source-map-support": "^0.5.19"
   },
@@ -287,9 +282,6 @@
     "node": ">=7.x",
     "npm": ">=4.x",
     "yarn": ">=0.21.3"
-  },
-  "collective": {
-    "url": "https://We.DontHaveACollectivePage"
   },
   "browserslist": [],
   "prettier": {

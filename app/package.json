@@ -5,14 +5,13 @@
   "description": "An open source note taking application",
   "main": "./main.prod.js",
   "author": {
-    "name": "Noetter Maintainers",
-    "email": "noemail@pucko.fail",
-    "url": "https://github.com/noteron/noetter"
+    "name": "Team Pucko",
+    "url": "https://github.com/noteron"
   },
   "scripts": {
     "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
     "postinstall": "yarn electron-rebuild"
   },
-  "license": "UNLICENSED",
+  "license": "GPL-3.0-only",
   "dependencies": {}
 }
