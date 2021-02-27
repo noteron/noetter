@@ -1,3 +1,6 @@
+/* eslint-disable promise/no-nesting */
+/* eslint-disable promise/always-return */
+/* eslint-disable promise/catch-or-return */
 /* eslint global-require: off, no-console: off */
 
 /**
@@ -11,10 +14,12 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import path from "path";
-import os, { platform } from "os";
-import { app, BrowserWindow } from "electron";
-import { autoUpdater } from "electron-updater";
+import os from "os";
+import { app, BrowserWindow, session } from "electron";
 import log from "electron-log";
+// import installExtension, {
+//   REACT_DEVELOPER_TOOLS
+// } from "electron-devtools-installer";
 import MenuBuilder from "./menu";
 
 enum NodeJsPlatform {
@@ -33,8 +38,8 @@ enum NodeJsPlatform {
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = "info";
-    autoUpdater.logger = log;
-    autoUpdater.checkForUpdatesAndNotify();
+    // autoUpdater.logger = log;
+    // autoUpdater.checkForUpdatesAndNotify();
   }
 }
 
@@ -126,20 +131,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
-
-  // Refer to https://www.electronjs.org/docs/tutorial/devtools-extension#how-to-load-a-devtools-extension
-  // for more information on platform specifics
-  const reactDevToolsId = "fmkadmapgofadopljbjfkapdkoienihi";
-  const reactDevToolsVersion = "4.10.1_0";
-  BrowserWindow.addDevToolsExtension(
-    os.platform() === NodeJsPlatform.Windows
-      ? path.join(
-          os.homedir(),
-          `AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\${reactDevToolsId}\\${reactDevToolsVersion}`
-        )
-      : `~/.config/google-chrome/Default/Extensions/${reactDevToolsId}/${reactDevToolsVersion}`
-  );
+  // new AppUpdater();
 };
 
 /**
@@ -162,7 +154,29 @@ if (process.env.E2E_BUILD === "true") {
 }
 
 app.on("activate", () => {
-  // On macOS it's common to re-create a window in the app when the
+  // On macOS it's common to re-create aya window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+// TODO: This is broken right now, monitor updates to the project and update electron-devtools-installer
+app.whenReady().then(() => {
+  // installExtension(REACT_DEVELOPER_TOOLS, true)
+  //   .then((name) => console.log(`Added Extension:  ${name}`))
+  //   .catch((err) => console.log("An error occurred: ", err));
+  // Refer to https://www.electronjs.org/docs/tutorial/devtools-extension#how-to-load-a-devtools-extension
+  // for more information on platform specifics
+  const reactDevToolsId = "fmkadmapgofadopljbjfkapdkoienihi";
+  const reactDevToolsVersion = "4.10.1_0";
+  session.defaultSession.loadExtension(
+    os.platform() === NodeJsPlatform.Windows
+      ? path.join(
+          os.homedir(),
+          `AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\${reactDevToolsId}\\${reactDevToolsVersion}`
+        )
+      : path.join(
+          os.homedir(),
+          `/.config/google-chrome/Default/Extensions/${reactDevToolsId}/${reactDevToolsVersion}`
+        )
+  );
 });
