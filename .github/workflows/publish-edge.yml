@@ -15,7 +15,7 @@ jobs:
   # This workflow contains a single job called "build"
   release-linux:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -38,13 +38,13 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: releases
+          name: releases-linux
           path: |
             release/*.snap
 
   release-windows:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: windows-2019
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -67,15 +67,14 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: releases
+          name: releases-windows
           path: |
             release\*.exe
 
   publish:
     needs:
       - release-linux
-      - release-windows
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Install Tool - Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
