@@ -93,7 +93,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: "edge/${GITHUB_RUN_NUMBER}"
+          tag_name: "edge/${github.run_number}"
           draft: false
           prerelease: true
           files: |
@@ -104,6 +104,6 @@ jobs:
 
             Download one of the artifacts below or install it on your linux distribution using snap `snap install noetter --edge`
 
-            This release is based on commit ${GITHUB_SHA}
+            This release is based on commit ${github.sha}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
