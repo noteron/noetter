@@ -60,7 +60,7 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install -g yarn
-          yarn
+          yarn --network-timeout 100000
 
       - name: Package - Windows
         run: yarn package-win
