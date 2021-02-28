@@ -23,15 +23,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Tool - Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "12"
-
       - name: Install Dependencies
-        run: |
-          npm install -g yarn
-          yarn
+        run: yarn
 
       - name: Package - Linux
         run: yarn package-linux
@@ -52,15 +45,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Tool - Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "12"
-
       - name: Install Dependencies
-        run: |
-          npm install -g yarn
-          yarn --network-timeout 100000
+        run: yarn
 
       - name: Package - Windows
         run: yarn package-win
@@ -68,14 +54,22 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: releases-windows
-          path: |
-            release\*.exe
+          path: release\*.exe
 
   publish:
     needs:
       - release-linux
     runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v2
+
+      - run: mkdir release
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: releases-linux
+          path: release/
+
       - name: Install Tool - Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
         with:
