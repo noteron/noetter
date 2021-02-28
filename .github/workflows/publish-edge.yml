@@ -27,7 +27,7 @@ jobs:
         run: yarn
 
       - name: Package - Linux
-        run: yarn package-linux
+        run: yarn package
 
       - uses: actions/upload-artifact@v2
         with:
@@ -49,7 +49,7 @@ jobs:
         run: yarn
 
       - name: Package - Windows
-        run: yarn package-win
+        run: yarn package
 
       - uses: actions/upload-artifact@v2
         with:
