@@ -13,7 +13,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  release:
+  release-linux:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -36,6 +36,32 @@ jobs:
       - name: Package - Linux
         run: yarn package-linux
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: releases
+          path: |
+            release/*.snap
+
+  release-windows:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Tool - Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install Dependencies
+        run: |
+          npm install -g yarn
+          yarn
+
       - name: Package - Windows
         run: yarn package-win
 
@@ -43,10 +69,12 @@ jobs:
         with:
           name: releases
           path: |
-            release/*.snap
-            release/*.exe
+            release\*.exe
 
   publish:
+    needs:
+      - release-linux
+      - release-windows
     runs-on: ubuntu-latest
     steps:
       - name: Install Tool - Snapcraft
