@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - feature/release-artifacts
 
 jobs:
   release-linux:
@@ -44,7 +43,8 @@ jobs:
           name: releases-windows
           path: release\*.exe
 
-  publish:
+  publish-linux:
+    name: Publish - Linux
     needs:
       - release-linux
     runs-on: ubuntu-20.04
@@ -75,8 +75,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - release-linux
+      - publish-linux
       - release-windows
-      - publish
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -86,13 +86,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: "edge/$GITHUB_RUN_NUMBER"
-          release_name: "edge/$GITHUB_RUN_NUMBER"
+          tag_name: "edge/${GITHUB_RUN_NUMBER}"
+          release_name: "edge/${GITHUB_RUN_NUMBER}"
           body: |
             This is an automatic bleeding edge release for the current master branch state.
 
             Download one of the artifacts below or install it on your linux distribution using snap `snap install noetter --edge`
 
-            This release is based on commit $GITHUB_SHA
+            This release is based on commit ${GITHUB_SHA}
           draft: false
           prerelease: true
