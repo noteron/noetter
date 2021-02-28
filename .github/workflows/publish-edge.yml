@@ -6,12 +6,14 @@ name: Publish - Edge
 # events but only for the master branch
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+      - feature/release-artifacts
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  snap-package:
+  release:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -26,20 +28,33 @@ jobs:
         with:
           node-version: "12"
 
-      - name: Install Tool - Snapcraft
-        uses: samuelmeuli/action-snapcraft@v1
-        with:
-          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN_EDGE }}
-
       - name: Install Dependencies
         run: |
           npm install -g yarn
           yarn
 
-      - name: Package Snap
-        run: yarn package-snap
+      - name: Package - Linux
+        run: yarn package-linux
 
-      - name: Get Version
+      - name: Package - Windows
+        run: yarn package-win
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: releases
+          path: |
+            release/*.snap
+            release/*.exe
+
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Tool - Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+        with:
+          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN_EDGE }}
+
+      - name: Get Application Version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@master
 

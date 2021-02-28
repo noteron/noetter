@@ -79,17 +79,15 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "msi"
+        "nsis"
       ]
     },
     "linux": {
       "target": [
-        "deb",
-        "AppImage",
         "snap"
       ],
-      "category": "Development"
+      "category": "Utility",
+      "icon": "icons/512x512.png"
     },
     "directories": {
       "buildResources": "resources",
@@ -102,7 +100,7 @@
   },
   "author": {
     "name": "Team Pucko",
-    "email": "noemail@pucko.fail",
+    "email": "zackarias@montell.se",
     "url": "https://github.com/noteron"
   },
   "contributors": [
@@ -112,7 +110,8 @@
       "url": "https://github.com/Wholteza"
     },
     {
-      "name": "Christoffer Olsson"
+      "name": "Christoffer Olsson",
+      "email": "noemail@pucko.fail"
     }
   ],
   "license": "GPL-3.0-only",

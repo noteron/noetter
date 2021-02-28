@@ -6,6 +6,7 @@
   "main": "./main.prod.js",
   "author": {
     "name": "Team Pucko",
+    "email": "zackarias@montell.se",
     "url": "https://github.com/noteron"
   },
   "scripts": {
