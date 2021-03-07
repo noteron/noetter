@@ -2,7 +2,7 @@ name: Publish - Stable
 on:
   workflow_dispatch:
 jobs:
- release-linux:
+  release-linux:
     name: Release - Linux
     runs-on: ubuntu-20.04
     steps:
