@@ -12,15 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - run: mkdir release
-      - uses: actions/download-artifact@v2
-        with:
-          name: releases-linux
-          path: release/
-      - uses: actions/download-artifact@v2
-        with:
-          name: releases-windows
-          path: release/
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
