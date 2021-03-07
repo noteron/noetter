@@ -1,7 +1,7 @@
 {
   "name": "noetter",
   "productName": "noetter",
-  "version": "0.2.0-alpha",
+  "version": "0.1.1-alpha",
   "description": "An open source note taking application",
   "main": "./main.prod.js",
   "author": {
