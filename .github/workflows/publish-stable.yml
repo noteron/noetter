@@ -28,7 +28,6 @@ jobs:
           name: releases-linux
           path: |
             release/*.snap
-
   release-windows:
     name: Release - Windows
     runs-on: windows-2019
@@ -46,7 +45,6 @@ jobs:
         with:
           name: releases-windows
           path: release\*.exe
-
   publish-linux:
     name: Publish - Linux
     needs:
@@ -73,7 +71,6 @@ jobs:
 
       - name: Publish Snap
         run: snapcraft upload --release stable release/noetter_${{ steps.package-version.outputs.current-version}}_amd64.snap
-
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
