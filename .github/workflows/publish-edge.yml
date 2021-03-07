@@ -89,10 +89,13 @@ jobs:
         with:
           name: releases-windows
           path: release/
+      - name: Get Application Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: edge/${github.run_number}
+          tag_name: ${{ steps.package-version.outputs.current-version}}+${{ github.run_number }}
           draft: false
           prerelease: true
           files: |

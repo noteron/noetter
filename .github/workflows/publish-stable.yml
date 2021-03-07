@@ -5,44 +5,107 @@ name: Publish - Stable
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
-  push:
-    tags:
-      - "stable/*"
+  workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  snap-package:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+ release-linux:
+    name: Release - Linux
+    runs-on: ubuntu-20.04
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Tool - Node
-        uses: actions/setup-node@v2
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Package - Linux
+        run: yarn package
+
+      - uses: actions/upload-artifact@v2
         with:
-          node-version: "12"
+          name: releases-linux
+          path: |
+            release/*.snap
+
+  release-windows:
+    name: Release - Windows
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Package - Windows
+        run: yarn package
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: releases-windows
+          path: release\*.exe
+
+  publish-linux:
+    name: Publish - Linux
+    needs:
+      - release-linux
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: mkdir release
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: releases-linux
+          path: release/
 
       - name: Install Tool - Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
         with:
           snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN_STABLE }}
 
-      - name: Install Dependencies
-        run: |
-          npm install -g yarn
-          yarn
-
-      - name: Package Snap
-        run: yarn package-snap
-
-      - name: Get Version
+      - name: Get Application Version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@master
 
       - name: Publish Snap
         run: snapcraft upload --release stable release/noetter_${{ steps.package-version.outputs.current-version}}_amd64.snap
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs:
+      - release-linux
+      - publish-linux
+      - release-windows
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - run: mkdir release
+      - uses: actions/download-artifact@v2
+        with:
+          name: releases-linux
+          path: release/
+      - uses: actions/download-artifact@v2
+        with:
+          name: releases-windows
+          path: release/
+      - name: Get Application Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.package-version.outputs.current-version}}+${{ github.run_number }}
+          draft: false
+          prerelease: false
+          files: |
+            release/*.snap
+            release/*.exe
+          body: |
+            Download one of the artifacts below or install it on your linux distribution using snap `snap install noetter`
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
