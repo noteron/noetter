@@ -96,11 +96,19 @@ const useTagButton = (
                 return [...aggregate, current];
               }, [])
             );
-            setOpen(false);
           }}
         />
       )) ?? [],
     [onTagsUpdated, tags, usedTagsFromOtherNotes]
+  );
+
+  const handleOnEnterUp: React.KeyboardEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      handleClose();
+    },
+    [handleClose]
   );
 
   return [
@@ -126,7 +134,7 @@ const useTagButton = (
         >
           <Paper className={classes.tagEditorContainer}>
             <ClickAwayListener onClickAway={handleClose}>
-              <div>{memoizedTags}</div>
+              <div onKeyUp={handleOnEnterUp}>{memoizedTags}</div>
             </ClickAwayListener>
           </Paper>
         </Grow>
