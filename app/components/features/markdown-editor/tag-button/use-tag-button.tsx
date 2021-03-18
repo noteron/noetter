@@ -96,7 +96,6 @@ const useTagButton = (
                 return [...aggregate, current];
               }, [])
             );
-            // setOpen(false);
           }}
         />
       )) ?? [],
