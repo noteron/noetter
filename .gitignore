@@ -59,3 +59,5 @@ editor.worker.js
 !.yarn/sdks
 !.yarn/versions
 .pnp.*
+build-state.yml
+install-state.gz
