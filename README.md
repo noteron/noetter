@@ -25,3 +25,7 @@ The idea is to make a note taking app that avoids locking the user to a certain 
 - Debug editor in console: ALT + S
 - Transform current row into checkbox: ALT + D
 - Save note: CTRL + S
+
+## Why not react 17
+
+Waiting for react router support
