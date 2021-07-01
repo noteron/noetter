@@ -18,14 +18,14 @@ type Props = {
 
 export type TagNode = {
   name: string;
-  children?: TagNode[];
+  children: TagNode[];
 };
 
 const createNodeTreeFromTagListOnly = (tagsList: string[]): TagNode => {
   const [head, ...rest] = tagsList;
   return {
     name: head,
-    children: rest.length ? [createNodeTreeFromTagListOnly(rest)] : undefined
+    children: rest.length ? [createNodeTreeFromTagListOnly(rest)] : []
   };
 };
 
@@ -91,7 +91,7 @@ const TagsTree = ({ onSettingsClick }: Props): JSX.Element => {
         name: head,
         children: rest.length
           ? [createNodeTreeFromTagListOnly(rest)]
-          : undefined
+          : []
       });
     },
     []
